@@ -1,0 +1,15 @@
+# Plain static site: no build step, publish the repository as it is.
+[build]
+  publish = "."
+  command = ""
+
+# Phones must always check for a new service worker, or updates get stuck.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
