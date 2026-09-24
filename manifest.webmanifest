@@ -1,0 +1,16 @@
+{
+  "name": "Star Captain",
+  "short_name": "Star Captain",
+  "description": "A bedtime maths and English adventure with Comet the space unicorn.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141B3C",
+  "theme_color": "#141B3C",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
