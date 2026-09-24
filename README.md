@@ -1,4 +1,4 @@
-# Star Captain
+# 11 Plus Hero
 
 A bedtime maths and English practice app for a Year 3 child working towards
 the Trafford grammar school test (curriculum-based English and maths from

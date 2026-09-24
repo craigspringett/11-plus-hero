@@ -46,7 +46,7 @@ export const YEAR_START = { 3: 1, 4: 3, 5: 5, 6: 7 };
 
 // ---------------- levels ----------------
 
-export const TITLES = ['Star Cadet', 'Moon Walker', 'Rocket Rider', 'Comet Chaser', 'Planet Spotter', 'Star Navigator', 'Word Explorer', 'Galaxy Explorer', 'Nebula Ranger', 'Asteroid Ace', 'Solar Voyager', 'Cosmic Captain', 'Supernova Scholar', 'Constellation Keeper', 'Starship Commander', 'Galaxy Guardian', 'Universe Wizard', 'Astro Legend', 'Space Superstar', 'Star Captain Supreme'];
+export const TITLES = ['Star Cadet', 'Moon Walker', 'Rocket Rider', 'Comet Chaser', 'Planet Spotter', 'Star Navigator', 'Word Explorer', 'Galaxy Explorer', 'Nebula Ranger', 'Asteroid Ace', 'Solar Voyager', 'Cosmic Captain', 'Supernova Scholar', 'Constellation Keeper', 'Starship Commander', 'Galaxy Guardian', 'Universe Wizard', 'Astro Legend', 'Space Superstar', 'Ultimate 11 Plus Hero'];
 
 export function starsForLevel(n) {
   return 60 + 30 * n; // stars needed to go from level n to n + 1

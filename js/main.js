@@ -1,4 +1,4 @@
-// Star Captain: the screens and the flow between them.
+// 11 Plus Hero: the screens and the flow between them.
 
 import { load, save, resetProgress, exportCode, importCode } from './state.js';
 import * as E from './engine.js';
@@ -7,7 +7,7 @@ import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 
@@ -688,7 +688,7 @@ SCREENS.grownups = () => {
       : `<button class="btn ghost" data-act="reset">Start again…</button>`}
   </div>
 
-  <p class="muted small" style="text-align:center">Star Captain ${VERSION} · Nothing is sent anywhere: all progress stays on this phone.</p>
+  <p class="muted small" style="text-align:center">11 Plus Hero ${VERSION} · Nothing is sent anywhere: all progress stays on this phone.</p>
 </section>`;
 };
 
@@ -897,7 +897,7 @@ const ACTIONS = {
       toast('Progress restored');
       go('grownups');
     } catch (err) {
-      toast(err.message.includes('Star Captain') ? err.message : 'That code didn’t work. Check it was copied in full.');
+      toast(err.message.includes('11 Plus Hero') ? err.message : 'That code didn’t work. Check it was copied in full.');
     }
   },
   reset() { view.confirmReset = true; render(); },
@@ -936,7 +936,7 @@ const ACTIONS = {
   },
   async flagsCopy() {
     const text = S.flags.map((f, i) => `${i + 1}. [${f.topic}, level ${f.d}${f.passage ? ', ' + f.passage : ''}] ${f.prompt}\n   Options: ${f.options.join(' / ')} (answer: ${f.answer})\n   Note: ${f.note || '(none)'}`).join('\n\n');
-    const ok = await copyText(`Star Captain flagged questions\n\n${text}`);
+    const ok = await copyText(`11 Plus Hero flagged questions\n\n${text}`);
     toast(ok ? 'Copied. Paste it into a message.' : 'Could not copy.');
   },
   flagsClear() { view.confirmClear = true; render(); },

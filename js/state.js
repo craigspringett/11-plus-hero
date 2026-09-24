@@ -83,7 +83,7 @@ export function importCode(code) {
   const json = decodeURIComponent(escape(atob(code.trim())));
   const parsed = JSON.parse(json);
   if (!parsed || typeof parsed !== 'object' || !('stars' in parsed) || !('skills' in parsed)) {
-    throw new Error('That does not look like a Star Captain backup code.');
+    throw new Error('That does not look like a 11 Plus Hero backup code.');
   }
   return merge(defaultState(), parsed);
 }
