@@ -7,7 +7,7 @@ import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
 
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 

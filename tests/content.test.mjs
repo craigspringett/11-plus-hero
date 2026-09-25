@@ -166,3 +166,27 @@ test('every badge can be tested on a fresh state without errors', () => {
   const s = defaultState();
   for (const b of BADGES) assert.ok(!b.test(s), b.id);
 });
+
+test('the one-off fresh start wipes test progress once and never again', async () => {
+  const { load, save, freshStartOnce } = await import('../js/state.js');
+  const mem = new Map();
+  const storage = { getItem: (k) => (mem.has(k) ? mem.get(k) : null), setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
+  const tested = defaultState();
+  tested.name = 'Tester';
+  tested.stars = 900;
+  tested.settings.pin = '1234';
+  tested.settings.extraMissions = true;
+  save(tested, storage);
+  const first = load(storage);
+  assert.equal(first.name, '');
+  assert.equal(first.stars, 0);
+  assert.equal(first.settings.pin, null);
+  assert.equal(first.settings.extraMissions, false);
+  first.name = 'Ada';
+  first.stars = 50;
+  save(first, storage);
+  assert.equal(freshStartOnce(storage), false);
+  const later = load(storage);
+  assert.equal(later.name, 'Ada');
+  assert.equal(later.stars, 50);
+});

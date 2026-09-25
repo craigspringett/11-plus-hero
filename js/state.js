@@ -48,8 +48,27 @@ function merge(base, saved) {
   return out;
 }
 
+// One-off wipe after the family's test run (25 September 2026): the first
+// time a phone opens this version, any test progress, PIN and settings are
+// cleared so Ada starts from the very beginning. The marker stops it ever
+// happening again on that phone.
+const FRESH_START = 'fresh-start-2026-09-25';
+
+export function freshStartOnce(storage = safeStorage()) {
+  try {
+    if (!storage || storage.getItem(FRESH_START)) return false;
+    const had = !!storage.getItem(KEY);
+    storage.removeItem(KEY);
+    storage.setItem(FRESH_START, new Date().toISOString());
+    return had;
+  } catch {
+    return false;
+  }
+}
+
 export function load(storage = safeStorage()) {
   try {
+    freshStartOnce(storage);
     const raw = storage && storage.getItem(KEY);
     if (!raw) return defaultState();
     return merge(defaultState(), JSON.parse(raw));
