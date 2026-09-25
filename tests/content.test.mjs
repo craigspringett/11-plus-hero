@@ -190,3 +190,12 @@ test('the one-off fresh start wipes test progress once and never again', async (
   assert.equal(later.name, 'Ada');
   assert.equal(later.stars, 50);
 });
+
+test('the offline file lists every app file, and each one exists and has content', async () => {
+  const { readFileSync, statSync } = await import('node:fs');
+  const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+  assert.ok(sw.includes("self.addEventListener('fetch'"), 'sw.js is complete');
+  const files = [...sw.match(/const FILES = \[([\s\S]*?)\];/)[1].matchAll(/'([^']+)'/g)].map((m) => m[1]).filter((f) => f !== './');
+  assert.ok(files.length > 15);
+  for (const f of files) assert.ok(statSync(new URL('../' + f, import.meta.url)).size > 0, f);
+});
