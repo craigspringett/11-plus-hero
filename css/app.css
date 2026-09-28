@@ -273,3 +273,6 @@ p { margin: 0; }
 .note.hit { background: var(--mint); animation-play-state: paused; transform: scale(1.2); transition: transform .15s; opacity: .9; }
 .note.bad { background: var(--coral); animation-play-state: paused; opacity: .6; }
 @keyframes noteFall { to { top: calc(100% + 10px); } }
+
+.namerow { display: flex; flex-direction: column; gap: 8px; padding: 10px 0 14px; border-bottom: 1px solid #ECE9F6; font-size: 15px; }
+.namerow .input { min-width: 0; width: 100%; }

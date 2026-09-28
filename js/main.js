@@ -7,7 +7,7 @@ import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
 
-const VERSION = '1.1.0';
+const VERSION = '1.1.2';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 
@@ -21,6 +21,13 @@ let gameTick = null;
 
 setSound(S.settings.sound);
 if (S.mission && S.mission.date !== todayKey()) S.mission = null;
+// Ada's stage name, asked for on 28 September 2026: rename her once.
+try {
+  if (!localStorage.getItem('stage-name-2026-09-28')) {
+    if (S.name === 'Ada') { S.name = 'Ada Rodrigo'; save(S); }
+    localStorage.setItem('stage-name-2026-09-28', '1');
+  }
+} catch { /* storage blocked: the name stays as it is */ }
 // Outfits chosen under the old space theme carry over to the new ones.
 if (S.wearing && E.OLD_WARDROBE[S.wearing]) S.wearing = E.OLD_WARDROBE[S.wearing];
 
@@ -136,7 +143,7 @@ SCREENS.onboarding = () => `
   <p class="speech muted" style="max-width:320px">I'm a butterfly who loves music, and I'm looking for a pop star to take on a world tour. Could it be you?</p>
   <form class="field" data-form="name" autocomplete="off">
     <label for="name" class="muted">What's your name, superstar?</label>
-    <input id="name" name="name" class="input" maxlength="20" autocapitalize="words" enterkeyhint="go" required data-autofocus>
+    <input id="name" name="name" class="input" maxlength="24" autocapitalize="words" enterkeyhint="go" required data-autofocus>
     <button class="btn" type="submit" style="margin-top:8px">Let\u2019s go on tour!</button>
   </form>
 </section>`;
@@ -812,6 +819,7 @@ SCREENS.grownups = () => {
 
   <div class="gcard" style="gap:0">
     <h2 style="margin-bottom:6px">Settings</h2>
+    <form class="namerow" data-form="rename" autocomplete="off"><label for="rename">Her name in the app</label><div class="row" style="gap:8px"><input id="rename" name="rename" class="input grow" maxlength="24" value="${esc(S.name)}"><button class="btn small" type="submit">Save</button></div></form>
     <label class="setting"><span>Mission length</span><select data-change="missionLength">${opt(5, set.missionLength, '5 questions')}${opt(10, set.missionLength, '10 questions')}${opt(15, set.missionLength, '15 questions')}</select></label>
     <label class="setting"><span>Violet goes to sleep at</span><select data-change="sleepTime">${times.map((t) => opt(t, set.sleepTime, t ? t.replace(/^(\d+):/, (_, h) => `${h - 12}:`) + ' pm' : 'Never (off)')).join('')}</select></label>
     <div class="setting"><span>Allow extra missions on the same day</span><button class="switch" role="switch" aria-checked="${set.extraMissions}" aria-label="Allow extra missions" data-act="toggle" data-key="extraMissions"></button></div>
@@ -1127,13 +1135,21 @@ app.addEventListener('submit', (e) => {
   e.preventDefault();
   const form = e.target.dataset.form;
   if (form === 'name') {
-    const name = e.target.name.value.trim().replace(/\s+/g, ' ').slice(0, 20);
+    const name = e.target.name.value.trim().replace(/\s+/g, ' ').slice(0, 24);
     if (!name) return;
     S.name = name;
     persist();
     sfx.levelUp();
     confetti(50);
     go('home');
+  }
+  if (form === 'rename') {
+    const name = e.target.rename.value.trim().replace(/\s+/g, ' ').slice(0, 24);
+    if (!name) return toast('Type a name first');
+    S.name = name;
+    persist();
+    toast(`Name changed to ${name}`);
+    return render();
   }
   if (form === 'forgot') {
     const v = Number(document.getElementById('sum').value);
@@ -1157,6 +1173,12 @@ document.addEventListener('visibilitychange', () => {
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
+  // When an update has just been fetched, reload to show it straight away,
+  // but never in the middle of a show or a game.
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && ['home', 'onboarding', 'stickers', 'goodnight'].includes(view.name)) location.reload();
+  });
 }
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
