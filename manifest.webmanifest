@@ -1,13 +1,13 @@
 {
   "name": "11 Plus Hero",
   "short_name": "11 Plus Hero",
-  "description": "A bedtime maths and English adventure with Comet the space unicorn.",
+  "description": "A bedtime maths and English adventure on a pop-star world tour.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#141B3C",
-  "theme_color": "#141B3C",
+  "background_color": "#1A1033",
+  "theme_color": "#1A1033",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },

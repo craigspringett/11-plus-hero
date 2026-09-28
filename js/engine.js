@@ -4,20 +4,22 @@
 // tested without a browser.
 
 import { times, addsub, problems, place, sequences, fractions, measures, shape } from './content/maths.js';
-import { spelling } from './content/spelling.js';
+import { spelling, misspell, YEAR2, YEAR34 } from './content/spelling.js';
 import { grammar } from './content/grammar.js';
 import { vocab } from './content/vocab.js';
 import { PASSAGES } from './content/reading.js';
-import { pick, shuffle, clamp, todayKey, choices } from './util.js';
+import { pick, shuffle, clamp, todayKey, choices, rint } from './util.js';
 
+// The "stages" of the tour. The ids stay the same as before so saved
+// progress carries over.
 export const PLANETS = {
-  number: { name: 'Number Planet', color: '#7CC7FF', icon: 'ringed' },
-  story: { name: 'Story Moon', color: '#B69CFF', icon: 'moon' },
-  spell: { name: 'Spell Station', color: '#6EE7B7', icon: 'station' },
-  grammar: { name: 'Grammar Galaxy', color: '#FF8C6B', icon: 'galaxy' },
-  fraction: { name: 'Fraction Falls', color: '#FFC857', icon: 'halves' },
-  measure: { name: 'Measure Mountain', color: '#F7A8D0', icon: 'mountain' },
-  shape: { name: 'Shape Nebula', color: '#A8E06C', icon: 'shapes' },
+  number: { name: 'Number Arena', color: '#7CC7FF', icon: 'mic' },
+  story: { name: 'Story Studio', color: '#C9A8FF', icon: 'book' },
+  spell: { name: 'Spelling Stage', color: '#6EE7B7', icon: 'abc' },
+  grammar: { name: 'Grammar Garage', color: '#FF8C6B', icon: 'guitar' },
+  fraction: { name: 'Fraction Festival', color: '#FFD166', icon: 'tent' },
+  measure: { name: 'Rhythm Room', color: '#FF7AB8', icon: 'metronome' },
+  shape: { name: 'Shape Spotlight', color: '#A8E06C', icon: 'spotlight' },
 };
 
 export const TOPICS = {
@@ -46,7 +48,7 @@ export const YEAR_START = { 3: 1, 4: 3, 5: 5, 6: 7 };
 
 // ---------------- levels ----------------
 
-export const TITLES = ['Star Cadet', 'Moon Walker', 'Rocket Rider', 'Comet Chaser', 'Planet Spotter', 'Star Navigator', 'Word Explorer', 'Galaxy Explorer', 'Nebula Ranger', 'Asteroid Ace', 'Solar Voyager', 'Cosmic Captain', 'Supernova Scholar', 'Constellation Keeper', 'Starship Commander', 'Galaxy Guardian', 'Universe Wizard', 'Astro Legend', 'Space Superstar', 'Ultimate 11 Plus Hero'];
+export const TITLES = ['Bedroom Singer', 'Busker', 'Open Mic Star', 'School Show Star', 'Local Radio Hit', 'Rising Star', 'Chart Climber', 'Top 40 Hit', 'Top 10 Hit', 'Number One', 'Gold Record', 'Platinum Record', 'Sold-out Show', 'Arena Star', 'Headliner', 'World Tour Star', 'Global Superstar', 'Music Legend', 'Hall of Fame', 'Ultimate 11 Plus Hero'];
 
 export function starsForLevel(n) {
   return 60 + 30 * n; // stars needed to go from level n to n + 1
@@ -68,31 +70,34 @@ export function titleFor(level) {
 }
 
 export const WARDROBE = [
-  { id: 'helmet', name: 'Space helmet', level: 3 },
-  { id: 'football', name: 'Football kit', level: 5 },
-  { id: 'rainbow', name: 'Rainbow mane', level: 7 },
-  { id: 'crown', name: 'Starry crown', level: 9 },
-  { id: 'scarf', name: 'Cosy scarf', level: 12 },
-  { id: 'glasses', name: 'Cool sunglasses', level: 15 },
+  { id: 'headphones', name: 'Pink headphones', level: 3 },
+  { id: 'guitar', name: 'Gold guitar', level: 5 },
+  { id: 'mic', name: 'Glitter microphone', level: 7 },
+  { id: 'crown', name: 'Pop-star crown', level: 9 },
+  { id: 'glasses', name: 'Heart sunglasses', level: 12 },
+  { id: 'sparkle', name: 'Glitter wings', level: 15 },
 ];
+
+// Outfits from the old space theme, mapped to the new ones.
+export const OLD_WARDROBE = { helmet: 'headphones', football: 'guitar', rainbow: 'mic', crown: 'crown', scarf: 'glasses', glasses: 'sparkle' };
 
 export const SHOOTOUT_LEVEL = 2;
 
 // What a new level brings, for the level-up screen.
 export function rewardsAt(level) {
   const out = [];
-  if (level === SHOOTOUT_LEVEL) out.push({ kind: 'bonus', name: 'Bonus round unlocked', detail: 'Times-table penalty shootout' });
+  if (level === SHOOTOUT_LEVEL) out.push({ kind: 'bonus', name: 'Encore unlocked', detail: 'A penalty shootout after every show' });
   const planetsBefore = new Set(Object.values(TOPICS).filter((t) => t.unlock < level).map((t) => t.planet));
   for (const [id, t] of Object.entries(TOPICS)) {
     if (t.unlock !== level) continue;
     if (!planetsBefore.has(t.planet)) {
-      out.push({ kind: 'planet', planet: t.planet, name: `New planet: ${PLANETS[t.planet].name}`, detail: t.name });
+      out.push({ kind: 'planet', planet: t.planet, name: `New stage: ${PLANETS[t.planet].name}`, detail: t.name });
       planetsBefore.add(t.planet);
     } else {
       out.push({ kind: 'topic', planet: t.planet, topic: id, name: `New on ${PLANETS[t.planet].name}`, detail: t.name });
     }
   }
-  for (const w of WARDROBE) if (w.level === level) out.push({ kind: 'wardrobe', item: w.id, name: `${w.name} for Comet`, detail: 'New in the wardrobe' });
+  for (const w of WARDROBE) if (w.level === level) out.push({ kind: 'wardrobe', item: w.id, name: `${w.name} for Violet`, detail: 'New in the wardrobe' });
   return out;
 }
 
@@ -194,11 +199,18 @@ function weightedPick(ids, weight) {
   return ids[ids.length - 1];
 }
 
-const PLANS = {
-  5: 'MMRRE',
-  10: 'MMMERRRMEM',
-  15: 'MMMERRRMEMMEMME',
+// M maths, E spelling/words/grammar, R reading, G a game half way through.
+export const PLANS = {
+  5: 'MMRGRE',
+  10: 'MMMERGRRMEM',
+  15: 'MMMERRRGMEMMEMME',
 };
+
+export const GAMES = [
+  { id: 'shootout', name: 'Penalty shootout', blurb: 'Answer fast to score!' },
+  { id: 'clock', name: 'Beat the clock', blurb: 'How many can you get in 30 seconds?' },
+  { id: 'catch', name: 'Catch the notes', blurb: 'Tap the right notes as they fall!' },
+];
 
 export function buildMission(state, now = new Date()) {
   const { level } = levelInfo(state.stars);
@@ -220,7 +232,12 @@ export function buildMission(state, now = new Date()) {
   const readingQs = readingQuestions(passage);
   const qs = [];
   let r = 0;
+  let gameAt = null;
   for (const slot of plan) {
+    if (slot === 'G') {
+      gameAt = qs.length;
+      continue;
+    }
     if (slot === 'R') {
       if (r < readingQs.length) qs.push(readingQs[r++]);
       continue;
@@ -235,6 +252,10 @@ export function buildMission(state, now = new Date()) {
     date: todayKey(now),
     passageId: passage.id,
     qs,
+    gameAt,
+    game: GAMES[(state.totals.missions || 0) % GAMES.length].id,
+    gameDone: false,
+    combo: 0,
     i: 0,
     wrong: [],
     results: [],
@@ -256,7 +277,12 @@ export function answer(state, mission, choice) {
   }
   const result = correct ? (tries === 0 ? 'first' : 'second') : 'wrong';
   if (!correct) mission.wrong.push(choice);
-  const stars = result === 'first' ? 10 : result === 'second' ? 5 : 0;
+  let stars = result === 'first' ? 10 : result === 'second' ? 5 : 0;
+  // A run of right-first-time answers is a combo: +2 bonus stars from the third.
+  mission.combo = result === 'first' ? (mission.combo || 0) + 1 : 0;
+  const comboBonus = mission.combo >= 3 ? 2 : 0;
+  stars += comboBonus;
+  state.totals.bestCombo = Math.max(state.totals.bestCombo || 0, mission.combo);
   const t = TOPICS[q.topic];
   updateSkill(skill(state, q.topic), result, q.d, t.max);
   const spent = Math.min(180, Math.round((Date.now() - (mission.qStartedAt || Date.now())) / 1000));
@@ -268,7 +294,95 @@ export function answer(state, mission, choice) {
   if (result === 'first') state.totals.firstTry++;
   if (result === 'second') state.totals.secondTry++;
   if (correct && q.bankWord) addWord(state, q.bankWord);
-  return { correct, done: true, result, stars };
+  return { correct, done: true, result, stars, combo: mission.combo, comboBonus };
+}
+
+// Is it time for the half-way game?
+export function gameDue(mission) {
+  return mission.gameAt !== null && mission.gameAt !== undefined && !mission.gameDone && mission.i === mission.gameAt;
+}
+
+// Record a game played inside a show: its stars count towards the show.
+export function finishGame(state, mission, game, score) {
+  const per = game === 'shootout' ? 3 : game === 'clock' ? 2 : 1;
+  const stars = Math.min(score * per, 30);
+  state.stars += stars;
+  state.totals.games = (state.totals.games || 0) + 1;
+  if (game === 'shootout') {
+    state.totals.goals += score;
+    state.totals.shootouts++;
+    state.totals.bestShootout = Math.max(state.totals.bestShootout, score);
+  }
+  if (game === 'clock') state.totals.bestClock = Math.max(state.totals.bestClock || 0, score);
+  if (game === 'catch') state.totals.bestCatch = Math.max(state.totals.bestCatch || 0, score);
+  if (mission) {
+    mission.stars += stars;
+    mission.gameDone = true;
+    mission.gameStars = stars;
+  }
+  return stars;
+}
+
+// Quick-fire facts for Beat the clock: times tables, doubles and number
+// bonds at her current level. Three answers each.
+export function quickFact(state) {
+  const t = Math.min(Math.floor(skill(state, 'times').d), 5);
+  const a = Math.min(Math.floor(skill(state, 'addsub').d), 5);
+  const r = Math.random();
+  let q;
+  if (r < 0.55) q = makeQuestion('times', t);
+  else if (r < 0.8) {
+    const total = a <= 2 ? pick([10, 20]) : pick([20, 100]);
+    const x = total === 100 ? rint(1, 19) * 5 : rint(1, total - 1);
+    const ans = total - x;
+    q = { prompt: `${x} + ? = ${total}`, ...numOptions(ans, [ans + 1, ans - 1, ans + 10, ans - 10, x]) };
+  } else {
+    const n = a <= 2 ? rint(2, 25) : rint(12, 99);
+    const dbl = Math.random() < 0.6 || n % 2;
+    const ans = dbl ? n * 2 : n / 2;
+    q = { prompt: dbl ? `Double ${n}` : `Half of ${n}`, ...numOptions(ans, [ans + 1, ans - 1, ans + 2, n, ans + 10]) };
+  }
+  const right = q.options[q.answer];
+  const opts = shuffle([right, ...q.options.filter((_, i) => i !== q.answer).slice(0, 2)]);
+  return { prompt: q.prompt, options: opts, answer: opts.indexOf(right) };
+}
+
+function numOptions(ans, wrong) {
+  const c = choices(ans, wrong.filter((w) => w >= 0 && w !== ans), 4, () => ans + rint(2, 5));
+  return { options: c.options.map(String), answer: c.answer };
+}
+
+// A rule for Catch the notes, and a stream of notes that do or don't fit it.
+export function catchRule(state) {
+  const t = Math.floor(skill(state, 'times').d);
+  const s = Math.floor(skill(state, 'spelling').d);
+  if (Math.random() < 0.35) {
+    const list = s <= 2 ? YEAR2 : YEAR34;
+    return {
+      text: 'Tap the words spelt correctly',
+      make: () => {
+        const w = pick(list);
+        if (Math.random() < 0.5) return { label: w, good: true };
+        const bad = misspell(w, 1)[0];
+        return bad ? { label: bad, good: false } : { label: w, good: true };
+      },
+      wide: true,
+    };
+  }
+  const n = t <= 1 ? pick([2, 5, 10]) : t <= 2 ? pick([3, 4, 5]) : t <= 3 ? pick([3, 4, 8]) : pick([6, 7, 8, 9]);
+  const max = n * 12;
+  return {
+    text: `Tap the multiples of ${n}`,
+    make: () => {
+      if (Math.random() < 0.5) {
+        const v = n * rint(1, 12);
+        return { label: String(v), good: true };
+      }
+      let v;
+      do v = rint(1, max); while (v % n === 0);
+      return { label: String(v), good: false };
+    },
+  };
 }
 
 export function nextQuestion(mission) {
@@ -406,7 +520,10 @@ export const BADGES = [
   { id: 'level5', name: 'Level 5', how: 'Reach level 5', icon: 'paw', color: '#6EE7B7', test: (s) => levelInfo(s.stars).level >= 5 },
   { id: 'level10', name: 'Level 10', how: 'Reach level 10', icon: 'paw', color: '#6EE7B7', test: (s) => levelInfo(s.stars).level >= 10 },
   { id: 'level20', name: 'Level 20', how: 'Reach level 20', icon: 'paw', color: '#6EE7B7', test: (s) => levelInfo(s.stars).level >= 20 },
-  { id: 'explorer', name: 'Planet explorer', how: 'Unlock every planet', icon: 'planet', color: '#A8E06C', test: (s) => unlockedPlanets(levelInfo(s.stars).level).length === Object.keys(PLANETS).length },
+  { id: 'combo5', name: 'Combo king', how: 'Get 5 right first time in a row', icon: 'sparkle', color: '#FF7AB8', test: (s) => (s.totals.bestCombo || 0) >= 5 },
+  { id: 'clock10', name: 'Speed star', how: 'Get 10 right in Beat the clock', icon: 'rocket', color: '#FF7AB8', test: (s) => (s.totals.bestClock || 0) >= 10 },
+  { id: 'catch10', name: 'Note catcher', how: 'Catch 10 notes in Catch the notes', icon: 'heart', color: '#FF7AB8', test: (s) => (s.totals.bestCatch || 0) >= 10 },
+  { id: 'explorer', name: 'World tour', how: 'Unlock every stage', icon: 'planet', color: '#A8E06C', test: (s) => unlockedPlanets(levelInfo(s.stars).level).length === Object.keys(PLANETS).length },
 ];
 
 export function checkBadges(state, now = new Date()) {

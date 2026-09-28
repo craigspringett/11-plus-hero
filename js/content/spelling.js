@@ -26,7 +26,7 @@ const REAL = new Set([
   'criticize', 'color', 'neighbor', 'marvelous', 'jewelry', 'shoulder', 'soldier', 'solider', 'breathe', 'lightening', 'lightning',
   'desert', 'dessert', 'stationary', 'stationery', 'principal', 'principle', 'advice', 'advise', 'device', 'devise', 'practice', 'practise',
   'licence', 'license', 'proceed', 'precede', 'descent', 'dissent', 'decent', 'moral', 'morale', 'rhythm', 'accident', 'address', 'dress',
-  'strange', 'stranger', 'complete', 'compete', 'separate', 'desperate', 'bargain', 'forty', 'fourty', 'harass', 'embarrass',
+  'strange', 'stranger', 'complete', 'compete', 'childe', 'olde', 'moste', 'kinde', 'separate', 'desperate', 'bargain', 'forty', 'fourty', 'harass', 'embarrass',
 ]);
 
 // Each rule returns a changed copy of the word, or null if it doesn't apply.

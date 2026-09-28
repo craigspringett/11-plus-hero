@@ -27,7 +27,7 @@ export function freshProgress() {
     badges: {},
     wearing: null,
     days: {},
-    totals: { missions: 0, questions: 0, firstTry: 0, secondTry: 0, perfect: 0, goals: 0, shootouts: 0, bestShootout: 0 },
+    totals: { missions: 0, questions: 0, firstTry: 0, secondTry: 0, perfect: 0, goals: 0, shootouts: 0, bestShootout: 0, games: 0, bestCombo: 0, bestClock: 0, bestCatch: 0 },
     lastMissionDate: null,
     mission: null,
   };

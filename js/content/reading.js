@@ -316,6 +316,47 @@ export const PASSAGES = [
       { q: 'What does the last paragraph show about Ada?', o: ['She had great imagination about the future', 'She did not like maths', 'She built computers herself', 'She wanted to be a poet'], h: 'What did she imagine machines might do?' },
     ],
   },
+  // ---------------- music passages (added for the pop-star tour) ----------------
+  {
+    id: 'first-guitar', d: 1, title: 'The Purple Guitar',
+    text: 'For her birthday, Mia got a purple guitar. It was shiny and new, and it smelled of wood and polish.\n\nAt first her fingers hurt when she pressed the strings. The notes buzzed and squeaked. But Mia practised every day after school.\n\nBy the end of the month she could play a whole song. She played it for Grandma, who clapped so hard her glasses fell off.',
+    word: { word: 'practised', meaning: 'did something again and again to get better at it' },
+    qs: [
+      { q: 'What colour was Mia’s guitar?', o: ['Purple', 'Pink', 'Blue', 'Gold'], h: 'Look at the first sentence.' },
+      { q: 'Why did the notes buzz and squeak at first?', o: ['Mia was only just learning', 'The guitar was broken', 'Grandma was singing', 'The strings were missing'], h: 'Her fingers hurt and she was new to it.' },
+      { q: 'How did Grandma feel about the song?', o: ['She loved it', 'She was bored', 'She was cross', 'She was sleepy'], h: 'What did she do that made her glasses fall off?' },
+    ],
+  },
+  {
+    id: 'school-show', d: 2, title: 'The School Show',
+    text: 'Zara had the solo in the school show. For weeks she sang it in the bath, on the way to school and even in her sleep.\n\nOn the night, the hall was packed. The lights went down. Zara’s mouth went dry and her knees began to wobble.\n\nThen she spotted her little brother in the front row, waving a glow stick and grinning. Zara smiled back, took a deep breath and sang the best she had ever sung. The audience cheered so loudly that the teachers had to cover their ears.',
+    word: { word: 'solo', meaning: 'a part sung or played by one person on their own' },
+    qs: [
+      { q: 'Where did Zara practise her song?', o: ['In the bath and on the way to school', 'Only at school', 'At a music club', 'In the garden'], h: 'Look at the first paragraph.' },
+      { q: 'What helped Zara feel brave?', o: ['Seeing her brother smiling', 'The lights going down', 'Her dry mouth', 'The teachers'], h: 'What did she spot in the front row?' },
+      { q: '<i>The hall was packed</i> means…', o: ['it was full of people', 'it was full of boxes', 'it was empty', 'it was closed'], h: 'Think about a packed suitcase.' },
+    ],
+  },
+  {
+    id: 'songwriter', d: 3, title: 'Writing a Song',
+    text: 'Many songwriters say that a song often starts with a feeling. It might be happiness, or it might be the ache of missing a friend who has moved away.\n\nNext comes the melody, the tune that you hum. Some writers find a melody on the piano; others sing into their phone on the bus so they don’t forget it.\n\nFinally come the lyrics, the words of the song. Good lyrics paint pictures in your mind. Instead of saying “I was sad”, a songwriter might say “the rain matched my mood”. That way, listeners feel the sadness for themselves.',
+    word: { word: 'melody', meaning: 'the tune of a song' },
+    qs: [
+      { q: 'What are <i>lyrics</i>?', o: ['The words of a song', 'The tune of a song', 'The drums in a song', 'The singer’s name'], h: 'Look at the last paragraph.' },
+      { q: 'Why might a writer sing into their phone on the bus?', o: ['So they don’t forget the tune', 'To call a friend', 'To annoy other people', 'Because pianos are too loud'], h: 'Read the end of the second paragraph.' },
+      { q: 'Why is <i>the rain matched my mood</i> better than <i>I was sad</i>?', o: ['It paints a picture so listeners feel it too', 'It is shorter', 'It is about the weather forecast', 'It rhymes with sad'], h: 'The writer explains this in the last sentence.' },
+    ],
+  },
+  {
+    id: 'on-tour', d: 4, title: 'Life on Tour',
+    text: 'When a pop star goes on tour, a small town travels with them. There are dancers, musicians, sound engineers, lighting experts, costume makers, cooks and drivers, sometimes more than a hundred people.\n\nThe stage often arrives in dozens of lorries. Crews work through the night to build it, and after the last song they take it all apart again, ready for the next city.\n\nFor the star, a tour can be thrilling but exhausting. Many singers protect their voice by drinking warm water, resting on days off and warming up for half an hour before every show, just like athletes warm up before a race.',
+    word: { word: 'exhausting', meaning: 'making you extremely tired' },
+    qs: [
+      { q: 'Why does the writer say <i>a small town travels with them</i>?', o: ['So many people work on a tour', 'The star takes their house with them', 'Tours only visit small towns', 'The lorries are as big as houses'], h: 'Look at the list in the first paragraph.' },
+      { q: 'When do crews take the stage apart?', o: ['After the last song', 'Before the show starts', 'During the interval', 'A week later'], h: 'Read the second paragraph.' },
+      { q: 'Why are singers compared to athletes?', o: ['Both warm up to protect their bodies', 'Both run races', 'Both win medals', 'Both wear trainers'], h: 'Look at the very last sentence.' },
+    ],
+  },
 ];
 
 export function passagesAt(d) {

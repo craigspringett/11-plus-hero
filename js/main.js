@@ -2,12 +2,12 @@
 
 import { load, save, resetProgress, exportCode, importCode } from './state.js';
 import * as E from './engine.js';
-import { comet, star, moon, planetIcon, badgeIcon, lockIcon, ICON } from './art.js';
+import { mascot, star, moon, planetIcon, badgeIcon, lockIcon, ICON } from './art.js';
 import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
 
-const VERSION = '1.0.2';
+const VERSION = '1.1.0';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 
@@ -16,9 +16,13 @@ let view = { name: 'home' };
 let queue = []; // celebrations still to show after a mission
 let shootTimer = null;
 let nextTimer = null;
+let gameTimer = null;
+let gameTick = null;
 
 setSound(S.settings.sound);
 if (S.mission && S.mission.date !== todayKey()) S.mission = null;
+// Outfits chosen under the old space theme carry over to the new ones.
+if (S.wearing && E.OLD_WARDROBE[S.wearing]) S.wearing = E.OLD_WARDROBE[S.wearing];
 
 function persist() {
   save(S);
@@ -27,6 +31,9 @@ function persist() {
 function go(name, params = {}) {
   clearTimeout(shootTimer);
   clearTimeout(nextTimer);
+  clearTimeout(gameTimer);
+  clearInterval(gameTick);
+  document.querySelectorAll('.note').forEach((n) => n.remove());
   view = { name, ...params };
   render();
   window.scrollTo(0, 0);
@@ -124,28 +131,28 @@ SCREENS.onboarding = () => `
 <section class="screen center">
   ${starsBg()}
   <div style="height:30px"></div>
-  <div class="bob">${comet({ mood: 'excited', size: 170 })}</div>
-  <h1>Hi! I'm Comet</h1>
-  <p class="speech muted" style="max-width:320px">I'm a baby space unicorn, and I need a captain to fly with me through the stars. Will you be my captain?</p>
+  <div class="bob">${mascot({ mood: 'excited', size: 170 })}</div>
+  <h1>Hi! I'm Violet</h1>
+  <p class="speech muted" style="max-width:320px">I'm a butterfly who loves music, and I'm looking for a pop star to take on a world tour. Could it be you?</p>
   <form class="field" data-form="name" autocomplete="off">
-    <label for="name" class="muted">What's your name, Captain?</label>
+    <label for="name" class="muted">What's your name, superstar?</label>
     <input id="name" name="name" class="input" maxlength="20" autocapitalize="words" enterkeyhint="go" required data-autofocus>
-    <button class="btn" type="submit" style="margin-top:8px">Blast off!</button>
+    <button class="btn" type="submit" style="margin-top:8px">Let\u2019s go on tour!</button>
   </form>
 </section>`;
 
 function cometLine(L, done, sleeping, resume) {
   const toGo = L.need - L.into;
-  if (sleeping && !resume) return 'Zzz… it’s past bedtime. I’m dreaming about stars. See you tomorrow!';
-  if (resume) return 'We’re halfway through a mission. Shall we finish it?';
-  if (S.totals.missions === 0) return `Welcome aboard, Captain ${esc(S.name)}! Let’s fly our very first mission together.`;
-  if (done && !S.settings.extraMissions) return 'Brilliant work tonight! Come back tomorrow for more stars.';
-  if (done) return 'That was fun! Fancy another mission?';
+  if (sleeping && !resume) return 'Zzz\u2026 it\u2019s past bedtime. I\u2019m dreaming about tomorrow\u2019s show. See you then!';
+  if (resume) return 'We\u2019re halfway through the show. Shall we finish it?';
+  if (S.totals.missions === 0) return `Welcome to the tour, ${esc(S.name)}! Let\u2019s put on our very first show.`;
+  if (done && !S.settings.extraMissions) return 'What a show! The crowd loved you. Come back tomorrow for the next one.';
+  if (done) return 'That was amazing! Fancy another show?';
   const lines = [
-    `Only ${toGo} more stars and we reach Level ${L.level + 1}. Shall we fly?`,
-    `I’ve been practising my times tables all day. Ready, Captain?`,
-    `${toGo} stars to Level ${L.level + 1}! Let’s go and get them.`,
-    `Tonight’s mission is ready. I packed snacks!`,
+    `Only ${toGo} more stars until Level ${L.level + 1}. Ready to rock?`,
+    `I\u2019ve been warming up my voice all day. Shall we start the show?`,
+    `${toGo} stars to Level ${L.level + 1}! Let\u2019s go and get them.`,
+    `Tonight\u2019s setlist is ready. There\u2019s a game half way through!`,
   ];
   return lines[new Date().getDate() % lines.length];
 }
@@ -156,7 +163,7 @@ SCREENS.home = () => {
   const done = E.missionDoneToday(S);
   const sleeping = E.asleep(S);
   const m = S.mission;
-  const plan = { 5: 'MMRRE', 10: 'MMMERRRMEM', 15: 'MMMERRRMEMMEMME' }[S.settings.missionLength] || 'MMMERRRMEM';
+  const plan = E.PLANS[S.settings.missionLength] || E.PLANS[10];
   const count = (c) => plan.split('').filter((x) => x === c).length;
   const today = todayKey();
   const days = E.weekDays();
@@ -166,26 +173,27 @@ SCREENS.home = () => {
   let mission;
   if (m) {
     mission = `
-      <div class="between"><h2>Mission in progress</h2><span class="muted small">question ${m.i + 1} of ${m.qs.length}</span></div>
+      <div class="between"><h2>Show in progress</h2><span class="muted small">question ${m.i + 1} of ${m.qs.length}</span></div>
       <button class="btn" data-act="resume">Carry on</button>`;
   } else if (sleeping) {
     mission = `
-      <div class="row">${moon(34)}<h2>Comet is asleep</h2></div>
-      <p class="muted">It’s past bedtime. Missions open again tomorrow.</p>`;
+      <div class="row">${moon(34)}<h2>Violet is asleep</h2></div>
+      <p class="muted">It\u2019s past bedtime. The next show is tomorrow.</p>`;
   } else if (done && !S.settings.extraMissions) {
     mission = `
-      <div class="row">${star(30)}<h2>Mission complete!</h2></div>
-      <p class="muted">You’ve done tonight’s mission. Come back tomorrow for the next one.</p>
+      <div class="row">${star(30)}<h2>Show complete!</h2></div>
+      <p class="muted">You\u2019ve done tonight\u2019s show. Come back tomorrow for the next one.</p>
       <button class="btn soft" data-act="nav" data-to="stickers">Look at my sticker book</button>`;
   } else {
     mission = `
-      <div class="between"><h2>${done ? 'Bonus mission' : 'Tonight’s mission'}</h2><span class="muted small">about ${S.settings.missionLength} mins</span></div>
+      <div class="between"><h2>${done ? 'Bonus show' : 'Tonight\u2019s show'}</h2><span class="muted small">about ${S.settings.missionLength} mins</span></div>
       <div class="mix">
         <div><b style="color:var(--sky)">${count('M')}</b>Maths</div>
         <div><b style="color:var(--lilac)">${count('R')}</b>Reading</div>
         <div><b style="color:var(--mint)">${count('E')}</b>Words</div>
+        <div><b style="color:var(--pink)">1</b>Game</div>
       </div>
-      <button class="btn" data-act="start">${done ? 'One more mission' : 'Start mission'}</button>`;
+      <button class="btn" data-act="start">${done ? 'One more show' : 'Start the show'}</button>`;
   }
 
   return `
@@ -194,7 +202,7 @@ SCREENS.home = () => {
   <div class="between">
     <div class="col" style="gap:2px">
       <span class="hello">${greeting()}</span>
-      <h1>Hi, Captain ${esc(S.name)}</h1>
+      <h1>Hi, ${esc(S.name)}</h1>
     </div>
     <div class="row" style="gap:6px">
       <button class="icon-btn" data-act="sound" aria-label="${S.settings.sound ? 'Turn sound off' : 'Turn sound on'}">${S.settings.sound ? ICON.soundOn : ICON.soundOff}</button>
@@ -203,9 +211,9 @@ SCREENS.home = () => {
   </div>
 
   <div class="card comet-card">
-    ${comet({ mood: sleeping && !m ? 'sleepy' : 'happy', wearing: S.wearing, size: 100 })}
+    ${mascot({ mood: sleeping && !m ? 'sleepy' : 'happy', wearing: S.wearing, size: 100 })}
     <div class="col" style="gap:6px">
-      <div class="speech-name">Comet says</div>
+      <div class="speech-name">Violet says</div>
       <p class="speech">${cometLine(L, done, sleeping, !!m)}</p>
     </div>
   </div>
@@ -227,7 +235,7 @@ SCREENS.home = () => {
   </div>
 
   <div class="col">
-    <span style="font-size:15px">Planets</span>
+    <span style="font-size:15px">Tour stages</span>
     <div class="planets">${Object.entries(E.PLANETS).map(([id, p]) => {
       const open = unlocked.includes(id);
       const at = Math.min(...Object.values(E.TOPICS).filter((t) => t.planet === id).map((t) => t.unlock));
@@ -243,7 +251,7 @@ SCREENS.home = () => {
 
 function nav(on) {
   return `<nav class="nav" aria-label="Main">
-    <button class="${on === 'home' ? 'on' : ''}" data-act="nav" data-to="home">${ICON.rocket}Mission</button>
+    <button class="${on === 'home' ? 'on' : ''}" data-act="nav" data-to="home">${ICON.rocket}Show</button>
     <button class="${on === 'stickers' ? 'on' : ''}" data-act="nav" data-to="stickers">${ICON.book}Sticker book</button>
     <button data-act="nav" data-to="gate">${ICON.lock}Grown-ups</button>
   </nav>`;
@@ -266,6 +274,7 @@ function layoutFor(q) {
 SCREENS.mission = () => {
   const m = S.mission;
   if (!m) return SCREENS.home();
+  if (E.gameDue(m)) return SCREENS.gameIntro();
   const q = m.qs[m.i];
   const t = E.TOPICS[q.topic];
   const P = E.PLANETS[t.planet];
@@ -289,8 +298,9 @@ SCREENS.mission = () => {
     feedback = `
       <div class="feedback ${good ? 'good' : 'nearly'}">
         <div class="between"><span class="title">${title}</span>${last.stars ? `<span class="row" style="gap:4px;color:var(--gold)">${star(20)}+${last.stars}</span>` : ''}</div>
+        ${last.combo >= 3 ? `<p class="combo">Combo \u00d7${last.combo}! +2 bonus stars</p>` : ''}
         <p>${good ? '' : 'The right answer is shown in green. '}${q.explain}</p>
-        <button class="btn" data-act="next" data-autofocus>${m.i + 1 < m.qs.length ? 'Next question' : 'Finish mission'}</button>
+        <button class="btn" data-act="next" data-autofocus>${m.i + 1 < m.qs.length ? (m.gameAt === m.i + 1 && !m.gameDone ? 'Half-time game!' : 'Next question') : 'Finish the show'}</button>
       </div>`;
   } else if (m.wrong.length) {
     feedback = `
@@ -301,13 +311,13 @@ SCREENS.mission = () => {
   } else if (view.hint) {
     feedback = `<div class="hintbox">${ICON.bulb}<span>${q.hint}</span></div>`;
   } else {
-    feedback = `<button class="hintbox" data-act="hint">${ICON.bulb}<span>Stuck? Tap here and Comet will give you a hint.</span></button>`;
+    feedback = `<button class="hintbox" data-act="hint">${ICON.bulb}<span>Stuck? Tap here and Violet will give you a hint.</span></button>`;
   }
 
   return `
 <section class="screen">
   <div class="topbar">
-    <button class="icon-btn" data-act="leave" aria-label="Leave the mission (it will be saved)">${ICON.close}</button>
+    <button class="icon-btn" data-act="leave" aria-label="Leave the show (it will be saved)">${ICON.close}</button>
     <div class="progress" style="grid-template-columns:repeat(${m.qs.length},minmax(0,1fr))" aria-label="Question ${m.i + 1} of ${m.qs.length}">
       ${m.qs.map((_, i) => `<i class="${i < m.i || (i === m.i && last) ? 'done' : i === m.i ? 'now' : ''}"></i>`).join('')}
     </div>
@@ -331,9 +341,9 @@ SCREENS.summary = () => {
 <section class="screen center">
   ${starsBg()}
   <div style="height:24px"></div>
-  <div class="bob">${comet({ mood: 'excited', wearing: S.wearing, size: 150 })}</div>
-  <h1>Mission complete!</h1>
-  <p class="muted" style="max-width:300px">${r.perfect ? 'Every single one right first time. A perfect mission, plus 20 bonus stars!' : r.correct >= r.total - 2 ? 'What a brilliant mission, Captain!' : 'You kept going and finished the mission. Well done!'}</p>
+  <div class="bob">${mascot({ mood: 'excited', wearing: S.wearing, size: 150 })}</div>
+  <h1>What a show!</h1>
+  <p class="muted" style="max-width:300px">${r.perfect ? 'Every single one right first time. A perfect show, plus 20 bonus stars!' : r.correct >= r.total - 2 ? 'The crowd is on its feet! Brilliant, ' + esc(S.name) + '!' : 'You kept going and finished the show. Well done!'}</p>
   <div class="stat3">
     <div><b style="color:var(--mint)">${r.correct}/${r.total}</b><span>right</span></div>
     <div><b style="color:var(--gold)">+${r.stars}</b><span>stars</span></div>
@@ -346,7 +356,7 @@ SCREENS.summary = () => {
 
 function rewardIcon(r) {
   if (r.kind === 'planet' || r.kind === 'topic') { const p = E.PLANETS[r.planet]; return planetIcon(p.icon, p.color, 40); }
-  if (r.kind === 'wardrobe') return comet({ wearing: r.item, size: 44, label: '' });
+  if (r.kind === 'wardrobe') return mascot({ wearing: r.item, size: 44, label: '' });
   return `<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14" fill="#F4F1FF"/><path d="M20 12l6 4.5-2.3 7h-7.4L14 16.5z" fill="#1A1446"/></svg>`;
 }
 
@@ -362,7 +372,7 @@ SCREENS.levelup = () => {
     <div class="bigLevel"><span style="font-size:18px;font-weight:800">Level</span><b>${lvl}</b></div>
   </div>
   <h1 style="font-size:30px;line-height:1.2">You’re a<br>${E.titleFor(lvl)}!</h1>
-  <p class="muted" style="max-width:300px">Comet is so proud of you, Captain ${esc(S.name)}.</p>
+  <p class="muted" style="max-width:300px">Violet is so proud of you, ${esc(S.name)}.</p>
   ${view.rewards.length ? `<div class="col" style="width:100%">${view.rewards.map((r) => `<div class="reward">${rewardIcon(r)}<div>${esc(r.name)}<small>${esc(r.detail)}</small></div></div>`).join('')}</div>` : ''}
   <div class="grow"></div>
   <p class="muted small">Next: ${L.need - L.into} stars to Level ${L.level + 1}</p>
@@ -403,9 +413,9 @@ SCREENS.goodnight = () => {
 <section class="screen center" style="background:var(--bg-deep)">
   ${starsBg()}
   <div style="height:40px"></div>
-  <div style="position:relative">${comet({ mood: 'sleepy', wearing: S.wearing, size: 150, label: 'Comet, asleep' })}<span class="zz" aria-hidden="true">z</span></div>
-  <h1>Great flying tonight</h1>
-  <p class="muted" style="max-width:300px">Comet is getting sleepy and dreaming about tomorrow’s adventure.</p>
+  <div style="position:relative">${mascot({ mood: 'sleepy', wearing: S.wearing, size: 150, label: 'Violet, asleep' })}<span class="zz" aria-hidden="true">z</span></div>
+  <h1>What a show tonight</h1>
+  <p class="muted" style="max-width:300px">Violet is getting sleepy and dreaming about tomorrow\u2019s show.</p>
   <div class="stat3">
     <div><b style="color:var(--gold)">+${t.stars}</b><span>stars tonight</span></div>
     <div><b style="color:var(--mint)">${t.correct}/${t.total}</b><span>right</span></div>
@@ -413,9 +423,9 @@ SCREENS.goodnight = () => {
   </div>
   <p class="small muted" style="padding:12px 16px;border:2px dashed var(--surface-2);border-radius:18px;width:100%">${tomorrow}</p>
   <div class="grow"></div>
-  ${canShoot ? `<button class="btn" data-act="shootout">Bonus round: penalty shootout</button>` : ''}
-  ${S.settings.extraMissions && !E.asleep(S) ? `<button class="btn ghost" data-act="start">One more mission</button>` : ''}
-  <button class="btn soft" data-act="goodnight" ${canShoot ? '' : 'data-autofocus'}>Goodnight, Comet</button>
+  ${canShoot ? `<button class="btn" data-act="shootout">Encore: penalty shootout</button>` : ''}
+  ${S.settings.extraMissions && !E.asleep(S) ? `<button class="btn ghost" data-act="start">One more show</button>` : ''}
+  <button class="btn soft" data-act="goodnight" ${canShoot ? '' : 'data-autofocus'}>Goodnight, Violet</button>
 </section>`;
 };
 
@@ -434,7 +444,7 @@ SCREENS.shootout = () => {
   return `
 <section class="screen">
   <div class="between">
-    <div><div class="small" style="letter-spacing:1.5px;color:var(--mint)">BONUS ROUND</div><h1 style="font-size:26px">Penalty shootout</h1></div>
+    <div><div class="small" style="letter-spacing:1.5px;color:var(--mint)">${v.inShow ? 'HALF-TIME GAME' : 'ENCORE'}</div><h1 style="font-size:26px">Penalty shootout</h1></div>
     <div class="chip score">${v.goals} goal${v.goals === 1 ? '' : 's'}</div>
   </div>
   <div class="pitch">
@@ -488,6 +498,7 @@ function takeKick(i) {
 
 function finishShootout() {
   const goals = view.goals;
+  if (view.inShow) return endGame('shootout', goals);
   const tonight = view.tonight;
   const res = E.finishShootout(S, goals);
   persist();
@@ -503,13 +514,157 @@ SCREENS.shootoutEnd = () => `
 <section class="screen center">
   ${starsBg()}
   <div style="height:40px"></div>
-  <div class="bob">${comet({ mood: view.goals >= 3 ? 'excited' : 'happy', wearing: S.wearing, size: 150 })}</div>
+  <div class="bob">${mascot({ mood: view.goals >= 3 ? 'excited' : 'happy', wearing: S.wearing, size: 150 })}</div>
   <h1>You scored ${view.goals} out of ${KICKS}!</h1>
-  <p class="muted">${view.goals === KICKS ? 'A perfect shootout! The crowd goes wild!' : view.goals >= 3 ? 'What a performance, Captain!' : 'Good effort! The more you practise your tables, the more you’ll score.'}</p>
+  <p class="muted">${view.goals === KICKS ? 'A perfect shootout! The crowd goes wild!' : view.goals >= 3 ? 'What a performance, ' + esc(S.name) + '!' : 'Good effort! The more you practise your tables, the more you’ll score.'}</p>
   <div class="chip score">${star(22)} +${view.stars} stars</div>
   <div class="grow"></div>
   <button class="btn" data-act="continue" data-autofocus>Continue</button>
 </section>`;
+
+// ----- half-time games (one each show, taking turns)
+
+const CLOCK_SECONDS = 30;
+const CATCH_SECONDS = 20;
+
+SCREENS.gameIntro = () => {
+  const g = E.GAMES.find((x) => x.id === S.mission.game) || E.GAMES[0];
+  return `
+<section class="screen center celebrate">
+  ${starsBg()}
+  <div style="height:40px"></div>
+  <div class="kicker">HALF-TIME GAME!</div>
+  <div class="bob">${mascot({ mood: 'excited', wearing: S.wearing, size: 150 })}</div>
+  <h1>${g.name}</h1>
+  <p class="muted" style="max-width:300px">${g.blurb} Every point wins stars for tonight’s show.</p>
+  <div class="grow"></div>
+  <button class="btn" data-act="playGame" data-autofocus>Let’s play!</button>
+</section>`;
+};
+
+function startGame(game, inShow) {
+  sfx.whistle();
+  if (game === 'shootout') {
+    clearTimeout(gameTimer);
+    clearInterval(gameTick);
+    view = { name: 'shootout', kick: 0, goals: 0, results: [], inShow };
+    return startKick();
+  }
+  if (game === 'clock') {
+    go('clock', { score: 0, started: Date.now(), q: E.quickFact(S), inShow });
+    gameTimer = setTimeout(() => endGame('clock', view.score), CLOCK_SECONDS * 1000);
+    gameTick = setInterval(() => {
+      const el = document.getElementById('secs');
+      if (el) el.textContent = Math.max(0, CLOCK_SECONDS - Math.floor((Date.now() - view.started) / 1000));
+    }, 250);
+    return;
+  }
+  go('catch', { score: 0, rule: E.catchRule(S), started: Date.now(), inShow });
+  const arena = document.getElementById('arena');
+  const spawn = () => {
+    if (view.name !== 'catch') return;
+    const n = view.rule.make();
+    const b = document.createElement('button');
+    b.className = 'note' + (view.rule.wide ? ' wide' : '');
+    b.dataset.act = 'note';
+    b.dataset.good = n.good ? '1' : '';
+    b.textContent = n.label;
+    const w = arena.clientWidth - (view.rule.wide ? 130 : 70);
+    b.style.left = Math.max(0, Math.round(Math.random() * w)) + 'px';
+    b.style.animationDuration = (3.6 + Math.random() * 1.2) + 's';
+    b.addEventListener('animationend', () => b.remove());
+    arena.appendChild(b);
+  };
+  spawn();
+  gameTick = setInterval(spawn, 750);
+  gameTimer = setTimeout(() => endGame('catch', view.score), CATCH_SECONDS * 1000);
+}
+
+SCREENS.clock = () => {
+  const v = view;
+  const elapsed = (Date.now() - v.started) / 1000;
+  const crowd = Math.min(100, Math.round((v.score / 12) * 100));
+  return `
+<section class="screen">
+  <div class="between">
+    <div><div class="small" style="letter-spacing:1.5px;color:var(--pink)">HALF-TIME GAME</div><h1 style="font-size:26px">Beat the clock</h1></div>
+    <div class="chip score"><span id="secs">${Math.max(0, CLOCK_SECONDS - Math.floor(elapsed))}</span>s</div>
+  </div>
+  <div class="timer"><span style="animation:shrink ${CLOCK_SECONDS}s linear forwards;animation-delay:-${elapsed.toFixed(2)}s"></span></div>
+  <div class="col" style="gap:6px">
+    <div class="between small"><span>Crowd noise</span><span class="score">${v.score} right</span></div>
+    <div class="bar crowd"><span style="width:${crowd}%"></span></div>
+  </div>
+  <div class="question big">${v.q.prompt}</div>
+  <div class="answers three">${v.q.options.map((o, i) => `<button class="ans" data-act="clockAns" data-i="${i}">${o}</button>`).join('')}</div>
+  ${v.flash ? `<p class="flash ${v.flash}">${v.flash === 'yes' ? 'Yes!' : 'Oops!'}</p>` : ''}
+</section>`;
+};
+
+function clockAnswer(i) {
+  if (view.name !== 'clock') return;
+  const ok = i === view.q.answer;
+  if (ok) { view.score++; sfx.right(); } else sfx.nearly();
+  view.flash = ok ? 'yes' : 'no';
+  view.q = E.quickFact(S);
+  render();
+}
+
+SCREENS.catch = () => `
+<section class="screen">
+  <div class="between">
+    <div><div class="small" style="letter-spacing:1.5px;color:var(--pink)">HALF-TIME GAME</div><h1 style="font-size:26px">Catch the notes</h1></div>
+    <div class="chip score"><span id="catchScore">${view.score}</span> caught</div>
+  </div>
+  <div class="timer"><span style="animation:shrink ${CATCH_SECONDS}s linear forwards"></span></div>
+  <p class="rule">${esc(view.rule.text)}</p>
+  <div id="arena" class="arena" aria-label="Falling notes"></div>
+</section>`;
+
+function tapNote(el) {
+  if (view.name !== 'catch' || el.classList.contains('hit') || el.classList.contains('bad')) return;
+  if (el.dataset.good) {
+    view.score++;
+    el.classList.add('hit');
+    sfx.right();
+    const sc = document.getElementById('catchScore');
+    if (sc) sc.textContent = view.score;
+  } else {
+    el.classList.add('bad');
+    sfx.nearly();
+  }
+  el.disabled = true;
+}
+
+function endGame(game, score) {
+  clearTimeout(gameTimer);
+  clearInterval(gameTick);
+  if (view.inShow && S.mission) {
+    const stars = E.finishGame(S, S.mission, game, score);
+    persist();
+    const g = E.GAMES.find((x) => x.id === game);
+    return go('gameEnd', { game: g, score, stars, backToShow: true, onEnter: () => { if (score >= 3) confetti(40); sfx.levelUp(); } });
+  }
+  go('home');
+}
+
+SCREENS.gameEnd = () => {
+  const v = view;
+  const unit = v.game.id === 'shootout' ? (v.score === 1 ? 'goal' : 'goals') : v.game.id === 'clock' ? 'right' : 'caught';
+  const great = v.game.id === 'shootout' ? v.score >= 3 : v.score >= 8;
+  return `
+<section class="screen center">
+  ${starsBg()}
+  <div style="height:40px"></div>
+  <div class="bob">${mascot({ mood: great ? 'excited' : 'happy', wearing: S.wearing, size: 150 })}</div>
+  <div class="kicker">${esc(v.game.name.toUpperCase())}</div>
+  <h1>${v.score} ${unit}!</h1>
+  <p class="muted">${great ? 'The crowd goes wild!' : 'Nice playing! Back to the show.'}</p>
+  <div class="chip score">${star(22)} +${v.stars} stars</div>
+  <div class="grow"></div>
+  <button class="btn" data-act="continue" data-autofocus>Back to the show</button>
+</section>`;
+};
 
 // ----- sticker book
 
@@ -526,9 +681,9 @@ SCREENS.stickers = () => {
     : `<button class="badge locked" data-act="badgeinfo" data-id="${b.id}"><span class="disc">${lockIcon(24)}</span>${esc(b.name)}</button>`).join('')}</div>
 
   <div class="card col" style="gap:14px">
-    <div class="between"><h2>Comet’s wardrobe</h2><span class="muted small">Tap to dress up</span></div>
+    <div class="between"><h2>Violet\u2019s wardrobe</h2><span class="muted small">Tap to dress up</span></div>
     <div class="row" style="gap:14px;align-items:center">
-      ${comet({ wearing: S.wearing, size: 110 })}
+      ${mascot({ wearing: S.wearing, size: 110 })}
       <div class="wardrobe grow">
         <button data-act="wear" data-id="" aria-pressed="${!S.wearing}">Nothing</button>
         ${E.WARDROBE.map((w) => L.level >= w.level
@@ -539,7 +694,7 @@ SCREENS.stickers = () => {
   </div>
 
   <div class="col">
-    <span style="font-size:15px">Planets</span>
+    <span style="font-size:15px">Tour stages</span>
     <div class="planets">${Object.entries(E.PLANETS).map(([id, p]) => unlockedP.includes(id)
       ? `<div class="planet">${planetIcon(p.icon, p.color, 36)}<span>${p.name}</span></div>`
       : `<div class="planet locked">${lockIcon(26)}<span>${p.name}</span></div>`).join('')}</div>
@@ -640,7 +795,7 @@ SCREENS.grownups = () => {
   return `
 <section class="screen grown">
   <div class="row"><button class="icon-btn" data-act="nav" data-to="home" aria-label="Back to the app">${ICON.back}</button>
-    <div><h1 style="font-size:24px">Grown-ups</h1><div class="muted small">Captain ${esc(S.name || '(not set)')} · Level ${L.level} · ${E.overallYear(S)} overall</div></div></div>
+    <div><h1 style="font-size:24px">Grown-ups</h1><div class="muted small">${esc(S.name || '(name not set)')} \u00b7 Level ${L.level} · ${E.overallYear(S)} overall</div></div></div>
 
   <div class="col" style="gap:8px"><h2>This week</h2>
   <div class="kpis">
@@ -658,7 +813,7 @@ SCREENS.grownups = () => {
   <div class="gcard" style="gap:0">
     <h2 style="margin-bottom:6px">Settings</h2>
     <label class="setting"><span>Mission length</span><select data-change="missionLength">${opt(5, set.missionLength, '5 questions')}${opt(10, set.missionLength, '10 questions')}${opt(15, set.missionLength, '15 questions')}</select></label>
-    <label class="setting"><span>Comet goes to sleep at</span><select data-change="sleepTime">${times.map((t) => opt(t, set.sleepTime, t ? t.replace(/^(\d+):/, (_, h) => `${h - 12}:`) + ' pm' : 'Never (off)')).join('')}</select></label>
+    <label class="setting"><span>Violet goes to sleep at</span><select data-change="sleepTime">${times.map((t) => opt(t, set.sleepTime, t ? t.replace(/^(\d+):/, (_, h) => `${h - 12}:`) + ' pm' : 'Never (off)')).join('')}</select></label>
     <div class="setting"><span>Allow extra missions on the same day</span><button class="switch" role="switch" aria-checked="${set.extraMissions}" aria-label="Allow extra missions" data-act="toggle" data-key="extraMissions"></button></div>
     <div class="setting"><span>Sounds</span><button class="switch" role="switch" aria-checked="${set.sound}" aria-label="Sounds" data-act="toggle" data-key="sound"></button></div>
     <label class="setting"><span>Starting point for new topics</span><select data-change="startYear">${[3, 4, 5, 6].map((y) => opt(y, set.startYear, 'Year ' + y)).join('')}</select></label>
@@ -821,10 +976,13 @@ const ACTIONS = {
     render();
   },
   start() {
-    if (E.asleep(S)) return toast('Comet is asleep. Missions open again tomorrow!');
+    if (E.asleep(S)) return toast('Violet is asleep. The next show is tomorrow!');
     startMission();
   },
   resume() { S.mission.qStartedAt = Date.now(); go('mission'); },
+  playGame() { startGame(S.mission.game, true); },
+  clockAns(el) { clockAnswer(Number(el.dataset.i)); },
+  note(el) { tapNote(el); },
   leave() { persist(); go('home'); },
   hint() { view.hint = true; render(); },
   answer(el) {
@@ -833,7 +991,8 @@ const ACTIONS = {
     const r = E.answer(S, m, i);
     if (!r) return;
     if (r.done) {
-      m.last = { result: r.result, stars: r.stars };
+      m.last = { result: r.result, stars: r.stars, combo: r.combo };
+      if (r.comboBonus) sfx.sticker();
       if (r.correct) { sfx.right(); floatStars(r.stars); } else sfx.nearly();
       say(r.correct ? 'Correct!' : 'Not this time. The right answer is shown.');
     } else {
@@ -849,7 +1008,10 @@ const ACTIONS = {
     view.hint = false;
     if (E.nextQuestion(m)) { persist(); render(); window.scrollTo(0, 0); } else finishMission();
   },
-  continue() { nextCelebration(); },
+  continue() {
+    if (view.backToShow) { S.mission.qStartedAt = Date.now(); return go('mission'); }
+    nextCelebration();
+  },
   goodnight() { sfx.goodnight(); go('home'); },
   shootout() {
     const tonight = view.tonight;
@@ -906,7 +1068,7 @@ const ACTIONS = {
     S = resetProgress(S);
     queue = [];
     persist();
-    toast('All progress cleared. Ready for a new captain!');
+    toast('All progress cleared. Ready for a new superstar!');
     go('home');
   },
   pvMore() { view.items = null; view.flagged = []; view.flagging = null; render(); },

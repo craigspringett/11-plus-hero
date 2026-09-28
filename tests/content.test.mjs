@@ -80,7 +80,7 @@ test('misspellings are never the word itself or another real word', () => {
 });
 
 test('levels need more stars as you go up', () => {
-  assert.deepEqual(levelInfo(0), { level: 1, into: 0, need: 90, title: 'Star Cadet' });
+  assert.deepEqual(levelInfo(0), { level: 1, into: 0, need: 90, title: 'Bedroom Singer' });
   assert.equal(levelInfo(90).level, 2);
   assert.equal(levelInfo(89).level, 1);
   assert.equal(levelInfo(90 + 120).level, 3);
@@ -105,7 +105,7 @@ test('a whole mission plays through, levels up and saves a day', () => {
   const res = finishMission(s, m);
   assert.equal(res.correct, 10);
   assert.ok(res.perfect);
-  assert.equal(res.stars, 120);
+  assert.equal(res.stars, 136); // 100 + 16 combo bonus + 20 perfect bonus
   assert.equal(res.levelAfter, 2);
   assert.ok(res.rewards.some((r) => r.kind === 'bonus'));
   assert.ok(res.newBadges.some((b) => b.id === 'first'));
@@ -198,4 +198,42 @@ test('the offline file lists every app file, and each one exists and has content
   const files = [...sw.match(/const FILES = \[([\s\S]*?)\];/)[1].matchAll(/'([^']+)'/g)].map((m) => m[1]).filter((f) => f !== './');
   assert.ok(files.length > 15);
   for (const f of files) assert.ok(statSync(new URL('../' + f, import.meta.url)).size > 0, f);
+});
+
+test('half-time games: due at the right point, score stars, questions are sound', async () => {
+  const { gameDue, finishGame, quickFact, catchRule, PLANS } = await import('../js/engine.js');
+  const s = defaultState();
+  const m = buildMission(s);
+  assert.equal(m.gameAt, PLANS[10].indexOf('G'));
+  assert.ok(!gameDue(m));
+  m.i = m.gameAt;
+  assert.ok(gameDue(m));
+  const before = s.stars;
+  assert.equal(finishGame(s, m, 'clock', 7), 14);
+  assert.equal(s.stars, before + 14);
+  assert.ok(!gameDue(m));
+  assert.equal(finishGame(s, null, 'shootout', 5), 15);
+  assert.equal(finishGame(s, null, 'catch', 99), 30, 'capped');
+  for (let i = 0; i < 500; i++) {
+    const q = quickFact(s);
+    assert.equal(q.options.length, 3);
+    assert.equal(new Set(q.options).size, 3, q.prompt);
+    assert.ok(q.answer >= 0);
+    const r = catchRule(s);
+    const n = r.make();
+    assert.ok(n.label && typeof n.good === 'boolean');
+    const mult = r.text.match(/multiples of (\d+)/);
+    if (mult) assert.equal(Number(n.label) % Number(mult[1]) === 0, n.good, r.text + ' ' + n.label);
+  }
+});
+
+test('combo bonus starts on the third right-first-time answer in a row', () => {
+  const s = defaultState();
+  const m = buildMission(s);
+  const got = [];
+  for (let k = 0; k < 4; k++) {
+    got.push(answer(s, m, m.qs[m.i].answer).comboBonus);
+    nextQuestion(m);
+  }
+  assert.deepEqual(got, [0, 0, 2, 2]);
 });

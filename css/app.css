@@ -2,23 +2,27 @@
 @font-face { font-family: 'Nunito'; src: url('../fonts/nunito.woff2') format('woff2'); font-weight: 200 1000; font-display: swap; }
 
 :root {
-  --bg: #141B3C;
-  --bg-deep: #0E1430;
-  --surface: #1F2853;
-  --surface-2: #2A3468;
-  --chip: #232C5C;
-  --line: #3A4480;
-  --text: #F4F1FF;
-  --muted: #B9BEE0;
-  --faint: #9CA2CC;
-  --gold: #FFC857;
-  --gold-ink: #1B1F3A;
+  color-scheme: dark;
+  --bg: #1A1033;
+  --bg-deep: #120A26;
+  --surface: #2A1B4F;
+  --surface-2: #3A2766;
+  --chip: #33215C;
+  --line: #56428F;
+  --text: #FBF4FF;
+  --muted: #D2C2EE;
+  --faint: #A898C9;
+  --gold: #FFD166;
+  --gold-ink: #2A1240;
+  --pink: #FF7AB8;
+  --accent: #FF7AB8;
+  --accent-ink: #2A1240;
   --coral: #FF8C6B;
-  --coral-bg: #3A2A40;
+  --coral-bg: #3E2340;
   --mint: #6EE7B7;
   --mint-bg: #173A3A;
   --mint-ink: #10213A;
-  --lilac: #B69CFF;
+  --lilac: #C9A8FF;
   --sky: #7CC7FF;
   --display: 'Fredoka', 'Nunito', system-ui, sans-serif;
   --body: 'Nunito', system-ui, -apple-system, sans-serif;
@@ -60,7 +64,7 @@ p { margin: 0; }
 .card.alt { background: var(--surface-2); }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--chip); border-radius: 999px; font-weight: 800; }
 
-.btn { display: flex; justify-content: center; align-items: center; gap: 8px; min-height: 58px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--gold); color: var(--gold-ink); font-family: var(--display); font-size: 21px; font-weight: 600; text-decoration: none; width: 100%; }
+.btn { display: flex; justify-content: center; align-items: center; gap: 8px; min-height: 58px; padding: 0 22px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-family: var(--display); font-size: 21px; font-weight: 600; text-decoration: none; width: 100%; }
 .btn:active { transform: scale(.98); }
 .btn.ghost { background: transparent; color: var(--text); border: 2px solid var(--line); }
 .btn.soft { background: var(--surface-2); color: var(--text); }
@@ -75,8 +79,8 @@ p { margin: 0; }
 .speech-name { font-family: var(--display); font-size: 18px; color: var(--gold); }
 .speech { font-size: 16px; line-height: 1.4; }
 .bar { height: 16px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
-.bar > span { display: block; height: 100%; background: var(--gold); border-radius: 999px; transition: width .8s cubic-bezier(.2,.8,.3,1); }
-.mix { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--lilac), var(--pink)); border-radius: 999px; transition: width .8s cubic-bezier(.2,.8,.3,1); }
+.mix { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .mix div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; background: var(--surface); border-radius: 16px; font-size: 13px; text-align: center; }
 .mix b { font-family: var(--display); font-size: 24px; font-weight: 600; }
 .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
@@ -88,13 +92,13 @@ p { margin: 0; }
 .planet.locked { background: transparent; border: 2px dashed var(--line); color: var(--faint); }
 .nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding-top: 10px; border-top: 1px solid var(--surface-2); margin-top: auto; }
 .nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 52px; background: none; border: 0; color: var(--muted); font-size: 13px; }
-.nav button.on { color: var(--gold); }
+.nav button.on { color: var(--pink); }
 
 /* mission */
 .topbar { display: flex; align-items: center; gap: 12px; }
 .progress { flex-grow: 1; display: grid; gap: 4px; }
 .progress i { height: 10px; border-radius: 999px; background: var(--surface-2); }
-.progress i.done { background: var(--gold); }
+.progress i.done { background: var(--pink); }
 .progress i.now { background: var(--text); }
 .where { display: flex; align-items: center; gap: 10px; }
 .where .display { font-size: 18px; }
@@ -131,17 +135,17 @@ p { margin: 0; }
 .plus { position: fixed; left: 50%; top: 40%; transform: translate(-50%, 0); font-family: var(--display); font-size: 44px; color: var(--gold); pointer-events: none; animation: floatup 1s ease-out forwards; z-index: 50; display: flex; align-items: center; gap: 6px; }
 
 /* celebrations */
-.celebrate { background: #1A1446; }
-.bigLevel { width: 180px; height: 180px; border-radius: 999px; background: var(--gold); color: var(--gold-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .7s cubic-bezier(.2,.9,.3,1.3) both; }
+.celebrate { background: #2A0F4A; }
+.bigLevel { width: 180px; height: 180px; border-radius: 999px; background: linear-gradient(135deg, var(--pink), var(--lilac)); color: var(--gold-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .7s cubic-bezier(.2,.9,.3,1.3) both; }
 .bigLevel b { font-family: var(--display); font-size: 88px; line-height: .9; font-weight: 700; }
 .rays { position: absolute; left: 50%; top: 50%; width: 300px; height: 300px; margin: -150px 0 0 -150px; animation: spin 18s linear infinite; }
-.reward { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #2A2468; border-radius: 18px; text-align: left; width: 100%; }
+.reward { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #3B1D66; border-radius: 18px; text-align: left; width: 100%; }
 .reward small { display: block; color: #C9CCEA; font-weight: 600; font-size: 14px; }
-.kicker { font-family: var(--display); font-size: 20px; letter-spacing: 3px; color: var(--gold); }
+.kicker { font-family: var(--display); font-size: 20px; letter-spacing: 3px; color: var(--pink); }
 .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 40; }
 .confetti i { position: absolute; top: -20px; width: 10px; height: 16px; border-radius: 3px; animation: fall linear forwards; }
 .stat3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; }
-.stat3 div { padding: 14px 6px; background: #1A2148; border-radius: 18px; }
+.stat3 div { padding: 14px 6px; background: var(--surface); border-radius: 18px; }
 .stat3 b { display: block; font-family: var(--display); font-size: 26px; font-weight: 600; }
 .stat3 span { font-size: 13px; color: var(--muted); }
 .zz { position: absolute; right: -10px; top: 0; font-family: var(--display); font-size: 28px; color: var(--lilac); animation: zz 2.6s ease-in-out infinite; }
@@ -255,3 +259,17 @@ p { margin: 0; }
 .kicks i { width: 22px; height: 22px; border-radius: 999px; border: 2px solid var(--line); }
 .kicks i.goal { background: var(--gold); border-color: var(--gold); }
 .kicks i.miss { background: var(--coral); border-color: var(--coral); }
+
+/* pop-star tour additions */
+.combo { font-family: var(--display); font-size: 18px; color: var(--pink); animation: pop .5s both; }
+.flash { text-align: center; font-family: var(--display); font-size: 22px; margin: 0; animation: pop .3s both; }
+.flash.yes { color: var(--mint); }
+.flash.no { color: var(--coral); }
+.bar.crowd { height: 14px; }
+.rule { font-family: var(--display); font-size: 22px; text-align: center; color: var(--lilac); margin: 0; }
+.arena { position: relative; height: 56vh; min-height: 360px; border-radius: 24px; overflow: hidden; background: radial-gradient(circle at 50% 110%, #5B2A8C 0%, var(--bg-deep) 70%); }
+.note { position: absolute; top: -70px; min-width: 64px; height: 64px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--lilac); color: var(--gold-ink); font-family: var(--display); font-size: 24px; font-weight: 600; animation: noteFall linear forwards; box-shadow: 0 0 0 4px rgba(255,122,184,.35); }
+.note.wide { font-family: var(--body); font-size: 18px; font-weight: 800; background: var(--pink); }
+.note.hit { background: var(--mint); animation-play-state: paused; transform: scale(1.2); transition: transform .15s; opacity: .9; }
+.note.bad { background: var(--coral); animation-play-state: paused; opacity: .6; }
+@keyframes noteFall { to { top: calc(100% + 10px); } }

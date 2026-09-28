@@ -4,39 +4,48 @@
 const NAVY = '#141B3C';
 const WHITE = '#F4F1FF';
 
-export function comet({ mood = 'happy', wearing = null, size = 120, label = 'Comet the space unicorn' } = {}) {
-  const jersey = wearing === 'football'
-    ? `<path d="M22 120 C22 104 36 96 60 96 C84 96 98 104 98 120 Z" fill="#7CC7FF"/><path d="M50 97 L60 108 L70 97" fill="none" stroke="#FFC857" stroke-width="4" stroke-linejoin="round"/><text x="78" y="116" font-family="Fredoka, sans-serif" font-size="12" font-weight="700" fill="${NAVY}">7</text>`
+// Violet, a purple butterfly who loves music. Moods: happy, sleepy,
+// excited. One accessory at a time from the wardrobe.
+export function mascot({ mood = 'happy', wearing = null, size = 120, label = 'Violet the butterfly' } = {}) {
+  const INK = '#2A1240';
+  const FACE = '#FBF4FF';
+  const wing = (d, fill) => `<path d="${d}" fill="${fill}"/>`;
+  const wings =
+    wing('M56 58 C 30 20, 2 26, 8 52 C 12 70, 36 72, 56 64 Z', '#B98CFF') +
+    wing('M64 58 C 90 20, 118 26, 112 52 C 108 70, 84 72, 64 64 Z', '#B98CFF') +
+    wing('M56 66 C 34 70, 16 88, 28 102 C 40 112, 54 96, 58 74 Z', '#FF7AB8') +
+    wing('M64 66 C 86 70, 104 88, 92 102 C 80 112, 66 96, 62 74 Z', '#FF7AB8') +
+    '<circle cx="28" cy="46" r="7" fill="#E4D2FF"/><circle cx="92" cy="46" r="7" fill="#E4D2FF"/><circle cx="36" cy="92" r="4.5" fill="#FFD1E8"/><circle cx="84" cy="92" r="4.5" fill="#FFD1E8"/>';
+  const sparkle = (x, y, r) => `<path d="M${x} ${y - r} L${x + r * 0.3} ${y - r * 0.3} L${x + r} ${y} L${x + r * 0.3} ${y + r * 0.3} L${x} ${y + r} L${x - r * 0.3} ${y + r * 0.3} L${x - r} ${y} L${x - r * 0.3} ${y - r * 0.3} Z" fill="#FFD166"/>`;
+  const glitter = wearing === 'sparkle' ? sparkle(16, 30, 6) + sparkle(106, 34, 5) + sparkle(18, 100, 4) + sparkle(104, 104, 6) + sparkle(60, 112, 4) : '';
+  const guitar = wearing === 'guitar'
+    ? `<path d="M88 70 L110 40" stroke="#6B4A2E" stroke-width="4" stroke-linecap="round"/><ellipse cx="84" cy="80" rx="12" ry="10" fill="#FFD166" transform="rotate(-40 84 80)"/><ellipse cx="92" cy="71" rx="8" ry="7" fill="#FFD166" transform="rotate(-40 92 71)"/><circle cx="86" cy="77" r="3" fill="${INK}"/><rect x="106" y="34" width="8" height="8" rx="2" fill="#6B4A2E" transform="rotate(-40 110 38)"/>`
     : '';
-  const crown = wearing === 'crown'
-    ? `<path d="M36 40 L38 16 L48 28 L60 12 L72 28 L82 16 L84 40 Z" fill="#FFC857" stroke="#E0A92E" stroke-width="2" stroke-linejoin="round"/><circle cx="48" cy="33" r="3" fill="#FF8C6B"/><circle cx="72" cy="33" r="3" fill="#6EE7B7"/>`
+  const mic = wearing === 'mic'
+    ? `<path d="M30 98 L40 80" stroke="#C9C2D9" stroke-width="5" stroke-linecap="round"/><circle cx="42" cy="76" r="8" fill="#FF7AB8"/><path d="M36 72 L48 80 M38 69 L49 76" stroke="#FFD166" stroke-width="1.6"/>`
     : '';
-  const mane = wearing === 'rainbow'
-    ? `<path d="M24 64 C 14 44, 34 28, 50 34" stroke="#FF8C6B" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M29 66 C 21 48, 38 36, 52 40" stroke="#FFC857" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M33 70 C 27 54, 41 43, 54 46" stroke="#6EE7B7" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M19 60 C 10 40, 30 22, 48 28" stroke="#7CC7FF" stroke-width="5" fill="none" stroke-linecap="round"/>`
-    : `<path d="M26 62 C 18 44, 36 30, 50 36" stroke="#B69CFF" stroke-width="9" fill="none" stroke-linecap="round"/>`;
+  const body = `<rect x="52" y="52" width="16" height="50" rx="8" fill="${FACE}"/><path d="M53 70 H67 M53 80 H67 M54 90 H66" stroke="#E4D2FF" stroke-width="2"/>`;
+  const antennae = `<path d="M54 26 C 50 14, 42 10, 38 12" stroke="#D9C4FF" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M66 26 C 70 14, 78 10, 82 12" stroke="#D9C4FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>${sparkle(37, 12, 5)}${sparkle(83, 12, 5)}`;
+  const head = `<circle cx="60" cy="40" r="17" fill="${FACE}"/>`;
   let eyes;
-  if (mood === 'sleepy') {
-    eyes = `<path d="M41 68 Q47 73 53 68" stroke="${NAVY}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M67 68 Q73 73 79 68" stroke="${NAVY}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-  } else if (mood === 'excited') {
-    eyes = `<circle cx="47" cy="67" r="7.5" fill="${NAVY}"/><circle cx="73" cy="67" r="7.5" fill="${NAVY}"/><path d="M50 61.5l1 2.2 2.4.3-1.8 1.6.5 2.4-2.1-1.2-2.1 1.2.5-2.4-1.8-1.6 2.4-.3z" fill="#FFC857"/><path d="M76 61.5l1 2.2 2.4.3-1.8 1.6.5 2.4-2.1-1.2-2.1 1.2.5-2.4-1.8-1.6 2.4-.3z" fill="#FFC857"/>`;
-  } else {
-    eyes = `<circle cx="47" cy="68" r="6.5" fill="${NAVY}"/><circle cx="73" cy="68" r="6.5" fill="${NAVY}"/><circle cx="49.5" cy="65.5" r="2.2" fill="#fff"/><circle cx="75.5" cy="65.5" r="2.2" fill="#fff"/>`;
-  }
+  if (mood === 'sleepy') eyes = `<path d="M50 40 Q54 44 58 40 M62 40 Q66 44 70 40" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  else if (mood === 'excited') eyes = `<circle cx="54" cy="39" r="4.6" fill="${INK}"/><circle cx="66" cy="39" r="4.6" fill="${INK}"/>${sparkle(55.5, 37.5, 2.2)}${sparkle(67.5, 37.5, 2.2)}`;
+  else eyes = `<circle cx="54" cy="40" r="4" fill="${INK}"/><circle cx="66" cy="40" r="4" fill="${INK}"/><circle cx="55.5" cy="38.5" r="1.4" fill="#fff"/><circle cx="67.5" cy="38.5" r="1.4" fill="#fff"/>`;
   const glasses = wearing === 'glasses'
-    ? `<rect x="36" y="60" width="22" height="15" rx="6" fill="${NAVY}"/><rect x="62" y="60" width="22" height="15" rx="6" fill="${NAVY}"/><path d="M58 66 H62" stroke="${NAVY}" stroke-width="3"/><path d="M40 63 L46 63" stroke="#7CC7FF" stroke-width="2" stroke-linecap="round"/><path d="M66 63 L72 63" stroke="#7CC7FF" stroke-width="2" stroke-linecap="round"/>`
+    ? `<path d="M54 45 C 46 40, 46 33, 51 33 C 53 33, 54 35, 54 35 C 54 35, 55 33, 57 33 C 62 33, 62 40, 54 45 Z" fill="#FF7AB8"/><path d="M66 45 C 58 40, 58 33, 63 33 C 65 33, 66 35, 66 35 C 66 35, 67 33, 69 33 C 74 33, 74 40, 66 45 Z" fill="#FF7AB8"/><path d="M57.5 37 H62.5" stroke="#FF7AB8" stroke-width="2"/>`
     : '';
   let mouth;
-  if (mood === 'sleepy') mouth = `<ellipse cx="60" cy="86" rx="4" ry="3" fill="${NAVY}"/>`;
-  else if (mood === 'excited') mouth = `<path d="M50 82 Q60 96 70 82 Z" fill="${NAVY}"/><path d="M55 88 Q60 92 65 88" fill="#FF8C6B"/>`;
-  else mouth = `<path d="M52 84 Q60 92 68 84" stroke="${NAVY}" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-  const scarf = wearing === 'scarf'
-    ? `<path d="M30 98 Q60 112 90 98 L92 106 Q60 122 28 106 Z" fill="#FF8C6B"/><path d="M40 103 L42 110 M52 106 L53 114 M66 106 L65 114 M78 103 L76 110" stroke="#FFC857" stroke-width="3"/><path d="M78 104 L86 120 L96 116 L88 100 Z" fill="#FF8C6B"/>`
+  if (mood === 'sleepy') mouth = `<ellipse cx="60" cy="49" rx="2.5" ry="2" fill="${INK}"/>`;
+  else if (mood === 'excited') mouth = `<path d="M54 47 Q60 56 66 47 Z" fill="${INK}"/>`;
+  else mouth = `<path d="M55 48 Q60 52 65 48" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+  const cheeks = `<circle cx="49" cy="46" r="3.2" fill="#FF7AB8" opacity="0.5"/><circle cx="71" cy="46" r="3.2" fill="#FF7AB8" opacity="0.5"/>`;
+  const phones = wearing === 'headphones'
+    ? `<path d="M42 42 C 42 16, 78 16, 78 42" stroke="#FF7AB8" stroke-width="5" fill="none"/><rect x="37" y="36" width="9" height="14" rx="4" fill="#FF7AB8"/><rect x="74" y="36" width="9" height="14" rx="4" fill="#FF7AB8"/>`
     : '';
-  const helmet = wearing === 'helmet'
-    ? `<circle cx="60" cy="64" r="55" fill="#7CC7FF" fill-opacity="0.16" stroke="#7CC7FF" stroke-width="3"/><path d="M28 30 Q 40 16 58 12" stroke="#fff" stroke-opacity="0.7" stroke-width="3" fill="none" stroke-linecap="round"/>`
+  const crown = wearing === 'crown'
+    ? `<path d="M47 26 L48 12 L55 20 L60 9 L65 20 L72 12 L73 26 Z" fill="#FFD166" stroke="#E0A92E" stroke-width="1.5" stroke-linejoin="round"/><circle cx="60" cy="21" r="2.2" fill="#FF7AB8"/>`
     : '';
-  const vb = wearing === 'helmet' ? '-6 -6 132 132' : '0 0 120 120';
-  return `<svg class="comet" width="${size}" height="${size}" viewBox="${vb}" role="img" aria-label="${label}">${jersey}${crown}<path d="M60 6 L69 38 L51 38 Z" fill="#FFC857"/><path d="M33 44 L38 18 L54 38 Z" fill="${WHITE}"/><path d="M87 44 L82 18 L66 38 Z" fill="${WHITE}"/><circle cx="60" cy="70" r="38" fill="${WHITE}"/>${mane}${eyes}${glasses}<circle cx="37" cy="81" r="6" fill="#FF8C6B" opacity="0.5"/><circle cx="83" cy="81" r="6" fill="#FF8C6B" opacity="0.5"/>${mouth}${scarf}${helmet}</svg>`;
+  return `<svg class="mascot" width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="${label}">${glitter}${wings}${body}${antennae}${head}${eyes}${glasses}${cheeks}${mouth}${phones}${crown}${guitar}${mic}</svg>`;
 }
 
 export function star(size = 20, color = '#FFC857') {
@@ -53,14 +62,15 @@ export function moon(size = 30, style = 'full') {
 
 export function planetIcon(icon, color, size = 40) {
   const s = `width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"`;
+  const D = '#1A1033';
   switch (icon) {
-    case 'ringed': return `<svg ${s}><circle cx="20" cy="20" r="12" fill="${color}"/><ellipse cx="20" cy="20" rx="19" ry="6" fill="none" stroke="${WHITE}" stroke-width="2.5" transform="rotate(-18 20 20)"/></svg>`;
-    case 'moon': return `<svg ${s}><path d="M33 24A13 13 0 0 1 16 7a13 13 0 1 0 17 17z" fill="${color}"/></svg>`;
-    case 'station': return `<svg ${s}><rect x="15" y="15" width="10" height="10" rx="2" fill="${color}"/><rect x="2" y="17" width="11" height="6" fill="${color}" opacity="0.7"/><rect x="27" y="17" width="11" height="6" fill="${color}" opacity="0.7"/><path d="M20 15V8" stroke="${color}" stroke-width="2"/><circle cx="20" cy="7" r="2" fill="${color}"/></svg>`;
-    case 'galaxy': return `<svg ${s}><path d="M20 20c0-6 8-8 11-3M20 20c0 6-8 8-11 3M20 20c6 0 8 8 3 11M20 20c-6 0-8-8-3-11" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/><circle cx="20" cy="20" r="3" fill="${WHITE}"/></svg>`;
-    case 'halves': return `<svg ${s}><circle cx="20" cy="20" r="14" fill="${color}"/><path d="M20 6v28M6 20h28" stroke="${NAVY}" stroke-width="2.5"/></svg>`;
-    case 'mountain': return `<svg ${s}><path d="M3 34 L15 12 L22 24 L27 17 L37 34 Z" fill="${color}"/><path d="M15 12 L11 19 L15 17 L18 19 Z" fill="${WHITE}"/></svg>`;
-    case 'shapes': return `<svg ${s}><path d="M8 32 L16 16 L24 32 Z" fill="${color}"/><rect x="22" y="8" width="12" height="12" rx="2" fill="${color}" opacity="0.8"/><circle cx="30" cy="30" r="6" fill="${color}" opacity="0.6"/></svg>`;
+    case 'mic': return `<svg ${s}><rect x="14" y="4" width="12" height="20" rx="6" fill="${color}"/><path d="M9 18 a11 11 0 0 0 22 0" stroke="${color}" stroke-width="3" fill="none"/><path d="M20 29 V36 M13 36 H27" stroke="${color}" stroke-width="3" stroke-linecap="round"/></svg>`;
+    case 'book': return `<svg ${s}><path d="M4 9 H16 a4 4 0 0 1 4 4 V34 a4 4 0 0 0 -4 -3 H4 Z" fill="${color}"/><path d="M36 9 H24 a4 4 0 0 0 -4 4 V34 a4 4 0 0 1 4 -3 H36 Z" fill="${color}" opacity="0.7"/><path d="M27 15 V24 a2.5 2.5 0 1 1 -2 -2.4 M27 15 L32 14" stroke="${D}" stroke-width="2" fill="none"/></svg>`;
+    case 'abc': return `<svg ${s}><rect x="2" y="12" width="12" height="16" rx="3" fill="${color}"/><rect x="14" y="8" width="12" height="16" rx="3" fill="${color}" opacity="0.8"/><rect x="26" y="14" width="12" height="16" rx="3" fill="${color}" opacity="0.6"/><text x="8" y="25" font-family="Fredoka, sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="${D}">A</text><text x="20" y="21" font-family="Fredoka, sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="${D}">B</text><text x="32" y="27" font-family="Fredoka, sans-serif" font-size="10" font-weight="700" text-anchor="middle" fill="${D}">C</text></svg>`;
+    case 'guitar': return `<svg ${s}><path d="M22 18 L35 5" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/><ellipse cx="15" cy="27" rx="10" ry="8.5" fill="${color}" transform="rotate(-45 15 27)"/><ellipse cx="22" cy="20" rx="6.5" ry="5.5" fill="${color}" transform="rotate(-45 22 20)"/><circle cx="16" cy="26" r="2.6" fill="${D}"/></svg>`;
+    case 'tent': return `<svg ${s}><path d="M4 34 L20 6 L36 34 Z" fill="${color}"/><path d="M20 6 L14 34 M20 6 L26 34" stroke="${D}" stroke-width="1.5" opacity="0.5"/><path d="M16 34 L20 24 L24 34 Z" fill="${D}"/><path d="M20 6 V2 L27 4 L20 6" fill="${color}"/></svg>`;
+    case 'metronome': return `<svg ${s}><path d="M12 36 L16 4 H24 L28 36 Z" fill="${color}"/><path d="M20 30 L29 9" stroke="${D}" stroke-width="2.5" stroke-linecap="round"/><circle cx="26" cy="16" r="3" fill="${D}"/></svg>`;
+    case 'spotlight': return `<svg ${s}><path d="M20 4 L6 36 H34 Z" fill="${color}" opacity="0.45"/><circle cx="20" cy="6" r="4" fill="${color}"/><path d="M12 36 L18 26 L24 36 Z" fill="${color}"/><rect x="24" y="26" width="8" height="8" fill="${color}" opacity="0.8"/></svg>`;
     default: return '';
   }
 }

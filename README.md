@@ -1,5 +1,10 @@
 # 11 Plus Hero
 
+Theme: a pop-star world tour with Violet the butterfly (purple, glitter,
+guitars). Each nightly show has a half-time game (penalty shootout, Beat the
+clock, Catch the notes, taking turns), combo bonuses for runs of right
+answers, and an encore penalty shootout after the show.
+
 A bedtime maths and English practice app for a Year 3 child working towards
 the Trafford grammar school test (curriculum-based English and maths from
 September 2027). It is a web app that installs on an iPhone home screen and
@@ -15,8 +20,8 @@ works offline.
 - **Two tries**: a wrong first answer shows a hint; right first time earns 10
   stars, right second time 5.
 - **Levels and rewards**: stars fill a level bar. Level 2 unlocks the
-  times-table penalty shootout; later levels open new planets (topics) and
-  outfits for Comet. There are 22 stickers to collect.
+  times-table penalty shootout; later levels open new stages (topics) and
+  outfits for Violet. There are 22 stickers to collect.
 - **Grown-ups area** (behind a PIN): progress by topic, a weekly summary,
   settings (mission length, bedtime, extra missions, starting year), a
   question checker for reviewing and flagging questions, backup codes and
@@ -26,18 +31,18 @@ Everything is stored on the phone (localStorage). Nothing is sent anywhere.
 
 ## Topics
 
-| Planet | Topics | Unlocks at level |
+| Stage | Topics | Unlocks at level |
 |---|---|---|
-| Number Planet | Times tables, adding and taking away, word problems | 1 |
+| Number Arena | Times tables, adding and taking away, word problems | 1 |
 | | Place value | 2 |
 | | Number patterns | 5 |
-| Story Moon | Reading (30 original passages, 3 questions each) | 1 |
-| Spell Station | Spelling (national curriculum word lists) | 1 |
+| Story Studio | Reading (34 original passages, 3 questions each) | 1 |
+| Spelling Stage | Spelling (national curriculum word lists) | 1 |
 | | Word meanings | 3 |
-| Grammar Galaxy | Grammar and punctuation | 4 |
-| Fraction Falls | Fractions and percentages | 6 |
-| Measure Mountain | Time, money and measures | 8 |
-| Shape Nebula | Shape and angles | 10 |
+| Grammar Garage | Grammar and punctuation | 4 |
+| Fraction Festival | Fractions and percentages | 6 |
+| Rhythm Room | Time, money and measures | 8 |
+| Shape Spotlight | Shape and angles | 10 |
 
 ## Files
 

@@ -215,18 +215,20 @@ export function addsub(d) {
 
 const PROBLEMS = {
   1: [
-    () => { const n = pick(NAMES), a = rint(4, 12), b = rint(3, 8); return { t: `${n} has ${a} shiny stars. Comet gives ${n} ${b} more. How many stars does ${n} have now?`, ans: a + b, op: `${a} + ${b} = ${a + b}` }; },
+    () => { const n = pick(NAMES), a = rint(4, 12), b = rint(3, 8); return { t: `${n} has ${a} glitter stickers. A friend gives ${n} ${b} more. How many stickers does ${n} have now?`, ans: a + b, op: `${a} + ${b} = ${a + b}` }; },
     () => { const a = rint(10, 20), b = rint(3, 9); return { t: `There are ${a} rabbits in a field. ${b} hop away. How many rabbits are left?`, ans: a - b, op: `${a} ${MINUS} ${b} = ${a - b}` }; },
     () => { const a = rint(5, 11), b = rint(4, 9); return { t: `A team scores ${a} goals in the first half and ${b} goals in the second half. How many goals altogether?`, ans: a + b, op: `${a} + ${b} = ${a + b}` }; },
   ],
   2: [
     () => { const n = pick(NAMES), a = rint(31, 59), b = rint(12, 29); return { t: `${n} has ${a} football stickers and gives ${b} to a friend. How many stickers does ${n} have left?`, ans: a - b, op: `${a} ${MINUS} ${b} = ${a - b}` }; },
     () => { const a = rint(24, 58), b = rint(17, 39); return { t: `A rocket travels ${a} km before lunch and ${b} km after lunch. How far does it travel in total?`, ans: a + b, op: `${a} + ${b} = ${a + b}` }; },
+    () => { const a = rint(40, 90), b = rint(12, 35); return { t: `A pop star sings ${a} songs on tour. ${b} of them are new songs. How many are old songs?`, ans: a - b, op: `${a} ${MINUS} ${b} = ${a - b}` }; },
     () => { const a = rint(60, 95), b = rint(18, 45); return { t: `A zoo has ${a} penguins. ${b} of them are swimming. How many are not swimming?`, ans: a - b, op: `${a} ${MINUS} ${b} = ${a - b}` }; },
   ],
   3: [
     () => { const a = rint(3, 6), b = rint(4, 10); return { t: `There are ${a} rockets. Each rocket carries ${b} astronauts. How many astronauts are there altogether?`, ans: a * b, op: `${a} ${TIMES} ${b} = ${a * b}` }; },
     () => { const g = rint(3, 6), each = rint(3, 8); return { t: `${g * each} carrots are shared equally between ${g} rabbits. How many carrots does each rabbit get?`, ans: each, op: `${g * each} ${DIVIDE} ${g} = ${each}` }; },
+    () => { const s = pick([4, 6]), g = rint(3, 8); return { t: `A guitar has ${s} strings. How many strings are there on ${g} guitars?`, ans: s * g, op: `${g} ${TIMES} ${s} = ${s * g}` }; },
     () => { const b = pick([4, 5, 8, 10]), a = rint(3, 9); return { t: `Unicorn treats come in bags of ${b}. How many treats are in ${a} bags?`, ans: a * b, op: `${a} ${TIMES} ${b} = ${a * b}` }; },
   ],
   4: [
@@ -236,10 +238,12 @@ const PROBLEMS = {
   ],
   5: [
     () => { const a = rint(3, 6), b = rint(6, 9), c = rint(3, 9); return { t: `A zoo has ${a} enclosures with ${b} penguins in each. ${c} penguins move to a new zoo. How many penguins are left?`, ans: a * b - c, op: `${a} ${TIMES} ${b} = ${a * b}, then ${a * b} ${MINUS} ${c} = ${a * b - c}`, extra: [a * b, a * b + c] }; },
+    () => { const songs = rint(8, 14), mins = rint(3, 4), talk = rint(5, 15); return { t: `A band plays ${songs} songs. Each song lasts ${mins} minutes, and they chat to the crowd for ${talk} minutes. How long is the show?`, ans: songs * mins + talk, op: `${songs} ${TIMES} ${mins} = ${songs * mins}, plus ${talk} = ${songs * mins + talk} minutes`, extra: [songs * mins, songs + mins + talk] }; },
     () => { const n = pick(NAMES), a = rint(25, 45), b = rint(12, 24), c = rint(8, 19); return { t: `${n} reads ${a} pages on Monday and ${b} pages on Tuesday. The book has ${a + b + c} pages. How many pages are left to read?`, ans: c, op: `${a} + ${b} = ${a + b}, then ${a + b + c} ${MINUS} ${a + b} = ${c}`, extra: [a + b] }; },
   ],
   6: [
     () => { const n = pick(NAMES), p = rint(3, 9) * 5, q = rint(4, 12) * 5, k = rint(2, 4); const ans = k * p + q; return { t: `${n} buys ${k} pencils at ${money(p)} each and a ruler for ${money(q)}. How much does ${n} spend?`, ans, op: `${k} ${TIMES} ${money(p)} = ${money(k * p)}, plus ${money(q)} = ${money(ans)}`, money: true, extra: [p + q, k * (p + q)] }; },
+    () => { const t = rint(15, 30), k = rint(2, 4), p = rint(3, 9) * 50; const ans = t * 100 * k + p; return { t: `Concert tickets cost \u00a3${t} each. A family buys ${k} tickets and a poster for ${money(p)}. How much do they spend?`, ans, op: `${k} ${TIMES} \u00a3${t} = \u00a3${t * k}, plus ${money(p)} = ${money(ans)}`, money: true, extra: [t * 100 + p, t * 100 * k] }; },
     () => { const price = rint(12, 30) * 10, k = rint(2, 3); const ans = 1000 - price * k; return { t: `Football socks cost ${money(price)} a pair. How much change from £10 for ${k} pairs?`, ans, op: `${k} ${TIMES} ${money(price)} = ${money(price * k)}, then £10 ${MINUS} ${money(price * k)} = ${money(ans)}`, money: true, extra: [1000 - price] }; },
   ],
   7: [
@@ -248,7 +252,8 @@ const PROBLEMS = {
   ],
   8: [
     () => { const c = rint(3, 6), ad = rint(6, 9), nc = rint(2, 4), na = rint(1, 3); const ans = c * nc + ad * na; return { t: `Zoo tickets cost £${c} for children and £${ad} for adults. How much do ${na} adult${na > 1 ? 's' : ''} and ${nc} children pay?`, ans: ans * 100, op: `${nc} ${TIMES} £${c} = £${c * nc} and ${na} ${TIMES} £${ad} = £${ad * na}, total £${ans}`, money: true, extra: [(c + ad) * 100, (c * na + ad * nc) * 100] }; },
-    () => { const per = rint(3, 6), days = 7, weeks = rint(2, 4); const ans = per * days * weeks; return { t: `Comet eats ${per} star biscuits every day. How many biscuits does Comet eat in ${weeks} weeks?`, ans, op: `${weeks} weeks = ${weeks * 7} days, and ${weeks * 7} ${TIMES} ${per} = ${ans}`, extra: [per * weeks, per * 5 * weeks] }; },
+    () => { const per = rint(3, 6), days = 7, weeks = rint(2, 4); const ans = per * days * weeks; return { t: `A singer practises ${per} songs every day. How many songs does she practise in ${weeks} weeks?`, ans, op: `${weeks} weeks = ${weeks * 7} days, and ${weeks * 7} ${TIMES} ${per} = ${ans}`, extra: [per * weeks, per * 5 * weeks] }; },
+    () => { const rows = rint(12, 25), seats = rint(20, 40); return { t: `A concert hall has ${rows} rows with ${seats} seats in each row. How many seats are there?`, ans: rows * seats, op: `${rows} ${TIMES} ${seats} = ${rows * seats}`, extra: [rows + seats, rows * seats + 10, rows * (seats - 1)] }; },
   ],
 };
 
