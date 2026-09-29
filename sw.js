@@ -1,6 +1,6 @@
 // Offline support: keeps a copy of every file so the app opens without
 // internet. Bump VERSION whenever any file changes so phones pick it up.
-const VERSION = 'eleven-plus-hero-1.1.3';
+const VERSION = 'eleven-plus-hero-1.1.4';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'fonts/fredoka.woff2', 'fonts/nunito.woff2',

@@ -7,7 +7,7 @@ import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
 
-const VERSION = '1.1.3';
+const VERSION = '1.1.4';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 
@@ -23,9 +23,10 @@ setSound(S.settings.sound);
 if (S.mission && S.mission.date !== todayKey()) S.mission = null;
 // Ada's stage name, asked for on 28 September 2026: rename her once.
 try {
-  if (!localStorage.getItem('stage-name-2026-09-28')) {
-    if (S.name === 'Ada') { S.name = 'Ada Rodrigo'; save(S); }
-    localStorage.setItem('stage-name-2026-09-28', '1');
+  // The name was first typed as "Captain Ada", so match that too.
+  if (!localStorage.getItem('stage-name-2026-09-29')) {
+    if (/^\s*(captain\s+)?ada\s*$/i.test(S.name || '')) { S.name = 'Ada Rodrigo'; save(S); }
+    localStorage.setItem('stage-name-2026-09-29', '1');
   }
 } catch { /* storage blocked: the name stays as it is */ }
 // Outfits chosen under the old space theme carry over to the new ones.
