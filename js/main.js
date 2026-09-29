@@ -6,8 +6,9 @@ import { mascot, star, moon, planetIcon, badgeIcon, lockIcon, ICON } from './art
 import { sfx, setSound } from './sound.js';
 import { esc, todayKey, pick, rint } from './util.js';
 import { PASSAGES } from './content/reading.js';
+import * as Sync from './sync.js';
 
-const VERSION = '1.1.4';
+const VERSION = '1.2.0';
 const app = document.getElementById('app');
 const live = document.getElementById('live');
 
@@ -33,8 +34,91 @@ try {
 if (S.wearing && E.OLD_WARDROBE[S.wearing]) S.wearing = E.OLD_WARDROBE[S.wearing];
 
 function persist() {
+  S.updatedAt = Date.now();
   save(S);
+  schedulePush();
 }
+
+// ----- sharing between phones
+
+const BUSY_SCREENS = ['mission', 'shootout', 'clock', 'catch', 'gameIntro', 'gameEnd'];
+let pushTimer = null;
+let pulling = false;
+let pushAfterPull = false;
+
+function schedulePush() {
+  const info = Sync.syncInfo();
+  if (!info) return;
+  if (pulling) { pushAfterPull = true; return; }
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushNow, 1200);
+}
+
+async function pushNow() {
+  const info = Sync.syncInfo();
+  if (!info) return;
+  try {
+    const r = await Sync.push(info.code, S);
+    if (r.newer) {
+      if (!BUSY_SCREENS.includes(view.name)) { useRemote(r.newer); render(); }
+    } else Sync.setSyncInfo({ ...info, lastSync: Date.now() });
+  } catch {
+    /* offline: it saves again after the next change or the next open */
+  }
+}
+
+function useRemote(remote) {
+  S = Sync.applyDownload(remote.state, S);
+  S.updatedAt = remote.updatedAt;
+  if (S.mission && S.mission.date !== todayKey()) S.mission = null;
+  setSound(S.settings.sound);
+  save(S);
+  const info = Sync.syncInfo();
+  if (info) Sync.setSyncInfo({ ...info, lastSync: Date.now() });
+}
+
+// Load the newest progress when the app opens or comes back to the front.
+async function syncNow() {
+  const info = Sync.syncInfo();
+  if (!info || pulling) return;
+  pulling = true;
+  try {
+    const remote = await Sync.pull(info.code);
+    if (Sync.remoteIsNewer(remote, S)) {
+      if (!BUSY_SCREENS.includes(view.name)) {
+        useRemote(remote);
+        if (['home', 'stickers', 'grownups', 'goodnight', 'onboarding'].includes(view.name)) render();
+      }
+    } else if (!remote || (S.updatedAt || 0) > remote.updatedAt) {
+      pushAfterPull = true;
+    }
+  } catch {
+    /* offline: carry on with what's on this phone */
+  } finally {
+    pulling = false;
+    if (pushAfterPull) { pushAfterPull = false; schedulePush(); }
+  }
+}
+
+function shareSummary(state) {
+  const L = E.levelInfo(state.stars || 0);
+  return `${esc(state.name || 'Your star')}: Level ${L.level}, ${(state.stars || 0).toLocaleString('en-GB')} stars`;
+}
+
+async function joinWith(text) {
+  const code = Sync.tidyCode(text);
+  if (!Sync.validCode(code)) return toast('Check the code: two words and four numbers, like violet-guitar-4821');
+  toast('Looking for that code…');
+  try {
+    const remote = await Sync.pull(code);
+    if (!remote) return toast('No progress found for that code. Check the spelling.');
+    document.querySelectorAll('.toast').forEach((t) => t.remove());
+    go('joinConfirm', { code, remote, back: view.name === 'grownups' ? 'grownups' : 'home' });
+  } catch {
+    toast('Couldn’t connect. Check the internet and try again.');
+  }
+}
+
 
 function go(name, params = {}) {
   clearTimeout(shootTimer);
@@ -135,6 +219,19 @@ function greeting() {
 
 const SCREENS = {};
 
+SCREENS.joinConfirm = () => `
+<section class="screen center">
+  ${starsBg()}
+  <div style="height:40px"></div>
+  <div class="bob">${mascot({ mood: 'excited', size: 150 })}</div>
+  <h1>Found it!</h1>
+  <p class="speech" style="max-width:320px">${shareSummary(view.remote.state)}</p>
+  <p class="muted small" style="max-width:320px">This phone will show the same progress from now on, and both phones stay in step.${S.name && S.stars ? ' What\u2019s on this phone now will be replaced.' : ''}</p>
+  <div class="grow"></div>
+  <button class="btn" data-act="joinYes" data-autofocus>Yes, join</button>
+  <button class="btn ghost" data-act="nav" data-to="${view.back}">Cancel</button>
+</section>`;
+
 SCREENS.onboarding = () => `
 <section class="screen center">
   ${starsBg()}
@@ -147,6 +244,9 @@ SCREENS.onboarding = () => `
     <input id="name" name="name" class="input" maxlength="24" autocapitalize="words" enterkeyhint="go" required data-autofocus>
     <button class="btn" type="submit" style="margin-top:8px">Let\u2019s go on tour!</button>
   </form>
+  ${view.joining
+    ? `<form class="field" data-form="join" autocomplete="off" style="margin-top:12px"><label for="joinCode" class="muted">Type the family code from the other phone</label><input id="joinCode" name="joinCode" class="input" placeholder="violet-guitar-4821" autocapitalize="none" autocorrect="off" spellcheck="false" data-autofocus><button class="btn soft" type="submit">Join</button></form>`
+    : `<button class="btn ghost small" style="margin-top:12px" data-act="showJoin">Already playing on another phone? Join here</button>`}
 </section>`;
 
 function cometLine(L, done, sleeping, resume) {
@@ -838,6 +938,19 @@ SCREENS.grownups = () => {
   </div>
 
   <div class="gcard">
+    <h2>Share with another phone</h2>
+    ${Sync.syncInfo()
+      ? `<p class="muted small">Sharing is on. Both phones load the latest progress when opened and save it after each question.</p>
+         <div style="font-family:var(--display);font-size:26px;text-align:center;padding:6px 0">${esc(Sync.syncInfo().code)}</div>
+         <p class="muted small" style="text-align:center">${Sync.syncInfo().lastSync ? 'Last saved online at ' + new Date(Sync.syncInfo().lastSync).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : 'Not saved online yet'}</p>
+         <button class="btn" data-act="shareCopy">Copy the family code</button>
+         <button class="btn ghost" data-act="shareOff">Stop sharing on this phone</button>`
+      : `<p class="muted small">Keep the same progress on two phones, for example yours and your partner\u2019s. Turn it on here, then type the family code into the other phone once.</p>
+         <button class="btn" data-act="shareOn">Turn on sharing</button>
+         <form class="namerow" data-form="join" autocomplete="off" style="border-bottom:0"><label for="joinCode">Or join with a code from the other phone</label><div class="row" style="gap:8px"><input id="joinCode" name="joinCode" class="input grow" placeholder="violet-guitar-4821" autocapitalize="none" autocorrect="off" spellcheck="false"><button class="btn small" type="submit">Join</button></div></form>`}
+  </div>
+
+  <div class="gcard">
     <h2>Backup</h2>
     <p class="muted small">Progress is saved on this phone only. Copy a backup code and keep it in your notes to move progress to a new phone.</p>
     <button class="btn ghost" data-act="backup">Copy backup code</button>
@@ -846,7 +959,7 @@ SCREENS.grownups = () => {
 
   <div class="gcard">
     <h2>Start again from the beginning</h2>
-    <p class="muted small">Clears the name, stars, levels, stickers, word bank and all progress on this phone. Settings, the PIN and flagged questions are kept.</p>
+    <p class="muted small">Clears the name, stars, levels, stickers, word bank and all progress on this phone (and on any phone sharing with it). Settings, the PIN and flagged questions are kept.</p>
     ${view.confirmReset
       ? `<p><b>Are you sure? This can’t be undone.</b></p><button class="btn danger" data-act="resetGo">Yes, start again</button><button class="btn ghost" data-act="resetCancel">Cancel</button>`
       : `<button class="btn ghost" data-act="reset">Start again…</button>`}
@@ -990,6 +1103,39 @@ const ACTIONS = {
   },
   resume() { S.mission.qStartedAt = Date.now(); go('mission'); },
   playGame() { startGame(S.mission.game, true); },
+  showJoin() { view.joining = true; render(); },
+  async shareOn() {
+    toast('Turning on sharing\u2026');
+    try {
+      let code = Sync.makeCode();
+      for (let i = 0; i < 3 && (await Sync.pull(code)); i++) code = Sync.makeCode();
+      S.updatedAt = Date.now();
+      save(S);
+      await Sync.push(code, S);
+      Sync.setSyncInfo({ code, lastSync: Date.now() });
+      render();
+      toast('Sharing is on. Type the code into the other phone.');
+    } catch {
+      toast('Couldn\u2019t connect. Check the internet and try again.');
+    }
+  },
+  async shareCopy() {
+    const ok = await copyText(Sync.syncInfo().code);
+    toast(ok ? 'Code copied' : 'Could not copy. Write it down instead.');
+  },
+  shareOff() {
+    Sync.setSyncInfo(null);
+    toast('Sharing is off on this phone. Its progress stays here.');
+    render();
+  },
+  joinYes() {
+    Sync.setSyncInfo({ code: view.code, lastSync: Date.now() });
+    useRemote(view.remote);
+    confetti(40);
+    sfx.levelUp();
+    toast('Joined! Both phones now share progress.');
+    go('home');
+  },
   clockAns(el) { clockAnswer(Number(el.dataset.i)); },
   note(el) { tapNote(el); },
   leave() { persist(); go('home'); },
@@ -1152,6 +1298,10 @@ app.addEventListener('submit', (e) => {
     toast(`Name changed to ${name}`);
     return render();
   }
+  if (form === 'join') {
+    joinWith(e.target.joinCode.value);
+    return;
+  }
   if (form === 'forgot') {
     const v = Number(document.getElementById('sum').value);
     if (v === view.a * view.b) {
@@ -1166,10 +1316,12 @@ app.addEventListener('submit', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && view.name === 'home') {
-    if (S.mission && S.mission.date !== todayKey()) { S.mission = null; persist(); }
+  if (document.visibilityState !== 'visible') return;
+  if (view.name === 'home') {
+    if (S.mission && S.mission.date !== todayKey()) { S.mission = null; save(S); }
     render();
   }
+  syncNow();
 });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
@@ -1184,3 +1336,4 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
 render();
+syncNow();

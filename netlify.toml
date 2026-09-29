@@ -1,7 +1,12 @@
-# Plain static site: no build step, publish the repository as it is.
+# The site is plain files; the build step only copies them into dist so that
+# the server code and its packages are not published as web pages.
 [build]
-  publish = "."
-  command = ""
+  publish = "dist"
+  command = "rm -rf dist && mkdir dist && cp -r index.html manifest.webmanifest sw.js css js fonts icons dist/"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
 # Phones must always check for a new service worker, or updates get stuck.
 [[headers]]

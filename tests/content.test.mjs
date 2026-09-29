@@ -237,3 +237,29 @@ test('combo bonus starts on the third right-first-time answer in a row', () => {
   }
   assert.deepEqual(got, [0, 0, 2, 2]);
 });
+
+test('sharing: codes, what goes online and what comes back', async () => {
+  const Sync = await import('../js/sync.js');
+  for (let i = 0; i < 200; i++) assert.ok(Sync.validCode(Sync.makeCode()));
+  assert.equal(Sync.tidyCode(' Violet Guitar 4821 '), 'violet-guitar-4821');
+  assert.equal(Sync.tidyCode('VIOLET-guitar-4821'), 'violet-guitar-4821');
+  assert.ok(!Sync.validCode('violet-4821'));
+  const local = defaultState();
+  local.name = 'Ada Rodrigo';
+  local.stars = 461;
+  local.settings.pin = '1234';
+  local.flags.push({ note: 'x' });
+  const up = Sync.forUpload(local);
+  assert.equal(up.settings.pin, null, 'the PIN never goes online');
+  assert.equal(up.flags.length, 0);
+  assert.equal(local.settings.pin, '1234', 'the phone keeps its own copy');
+  const other = defaultState();
+  other.settings.pin = '9999';
+  const merged = Sync.applyDownload(up, other);
+  assert.equal(merged.name, 'Ada Rodrigo');
+  assert.equal(merged.stars, 461);
+  assert.equal(merged.settings.pin, '9999', 'each phone keeps its own PIN');
+  assert.ok(Sync.remoteIsNewer({ updatedAt: 20 }, { updatedAt: 10 }));
+  assert.ok(!Sync.remoteIsNewer({ updatedAt: 10 }, { updatedAt: 20 }));
+  assert.ok(!Sync.remoteIsNewer(null, { updatedAt: 1 }));
+});
